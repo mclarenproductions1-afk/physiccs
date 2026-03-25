@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maths Advanced — Infinite Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --ink:#16120e;
+  --paper:#faf7f2;
+  --cream:#f0ebe0;
+  --rule:#d8d0c2;
+  --rule-strong:#b8ae9c;
+  --accent:#b5451b;
+  --accent-dim:#e8c4b4;
+  --accent-bg:#fdf3ee;
+  --blue:#1a4d7a;
+  --blue-bg:#eef4fb;
+  --blue-dim:#b8d0e8;
+  --green:#1a6b3a;
+  --green-bg:#edf7f2;
+  --green-dim:#8ecfaa;
+  --red:#8b1a1a;
+  --red-bg:#fdf0f0;
+  --red-dim:#e8a8a8;
+  --muted:#7a7060;
+  --mono:'JetBrains Mono',monospace;
+  --serif:'Lora',serif;
+  --sans:'Outfit',sans-serif;
+}
+
+html{font-size:16px;scroll-behavior:smooth}
+
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-weight:400;
+  min-height:100vh;
+  line-height:1.6;
+}
+
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size:200px;pointer-events:none;z-index:999
+}
+
+.site-header{
+  background:var(--ink);
+  color:var(--paper);
+  padding:20px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.site-header h1{
+  font-family:var(--serif);
+  font-size:18px;font-weight:400;letter-spacing:0.2px;
+}
+.site-header h1 em{font-style:italic;color:#d4a882}
+.header-right{display:flex;gap:24px;align-items:center}
+.hstat{text-align:right}
+.hstat-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;opacity:0.5;margin-bottom:1px}
+.hstat-val{font-family:var(--mono);font-size:15px;font-weight:500}
+
+main{max-width:760px;margin:0 auto;padding:40px 24px 100px}
+
+.q-card{
+  background:white;
+  border:1px solid var(--rule);
+  border-radius:12px;
+  margin-bottom:16px;
+  overflow:hidden;
+  animation:slideUp .3s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.q-header{
+  padding:16px 20px 14px;
+  border-bottom:1px solid var(--cream);
+  display:flex;align-items:flex-start;gap:14px;
+}
+.q-num{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  color:white;background:var(--ink);
+  border-radius:4px;padding:3px 8px;margin-top:1px;
+  white-space:nowrap;flex-shrink:0;
+}
+.q-topic{font-family:var(--mono); font-size:11px; text-transform:uppercase; color:var(--muted); margin-top:3px;}
+
+.q-text{
+  font-family:var(--serif);font-size:16.5px;
+  line-height:1.65;color:var(--ink);flex:1;
+}
+.q-text .math{
+  font-family:var(--mono);font-size:14px;
+  background:var(--cream);border-radius:4px;
+  padding:2px 6px;color:var(--accent);
+}
+
+.q-body{padding:16px 20px 20px}
+.q-note{
+  font-size:13px;color:var(--muted);
+  background:var(--cream);border-radius:6px;
+  padding:10px 14px;margin-bottom:14px;
+  font-family:var(--mono);line-height:1.7;
+}
+
+.answer-label{
+  font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;
+  font-family:var(--mono);
+}
+.input-row{display:flex;gap:10px;align-items:center}
+.ans-input{
+  flex:1;height:46px;padding:0 14px;
+  font-family:var(--mono);font-size:15px;
+  color:var(--ink);background:var(--paper);
+  border:1.5px solid var(--rule-strong);border-radius:8px;
+  outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.ans-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(181,69,27,.12)}
+
+.check-btn, .next-btn{
+  height:46px;padding:0 20px;
+  background:var(--ink);color:var(--paper);
+  font-family:var(--sans);font-size:14px;font-weight:500;
+  border:none;border-radius:8px;cursor:pointer;
+  transition:background .15s,transform .1s;white-space:nowrap;
+}
+.check-btn:hover, .next-btn:hover{background:var(--accent)}
+
+.feedback{
+  margin-top:12px;border-radius:8px;padding:14px 16px;
+  font-size:13.5px;line-height:1.7;display:none;
+}
+.feedback.show{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+.feedback.correct{background:var(--green-bg);border:1px solid var(--green-dim);color:var(--green)}
+.feedback.wrong{background:var(--red-bg);border:1px solid var(--red-dim);color:var(--red)}
+
+.fb-head{font-family:var(--serif);font-size:16px;font-weight:600;margin-bottom:5px}
+.fb-working{font-family:var(--mono);font-size:12px;opacity:.85;white-space:pre-wrap;margin-top:6px;}
+
+.mcq-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.mcq-opt, .tf-btn{
+  background:var(--paper);border:1.5px solid var(--rule-strong);
+  border-radius:8px;padding:10px 14px;
+  font-family:var(--mono);font-size:13.5px;
+  cursor:pointer;text-align:left;color:var(--ink);
+}
+.mcq-opt.selected, .tf-btn.selected{border:2px solid var(--blue);background:var(--blue-bg);}
+.mcq-opt.opt-correct, .tf-btn.opt-correct{border:2px solid var(--green-dim);background:var(--green-bg);color:var(--green)}
+.mcq-opt.opt-wrong, .tf-btn.opt-wrong{border:2px solid var(--red-dim);background:var(--red-bg);color:var(--red)}
+
+.next-wrap{margin-top:20px; display:flex; justify-content: flex-end;}
+
+@media(max-width:600px){
+  .mcq-options{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>Maths Advanced <em>Year 11</em></h1>
+  <div class="header-right">
+    <div class="hstat">
+      <div class="hstat-label">Streak</div>
+      <div class="hstat-val" id="hdr-streak">0</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-label">Total Correct</div>
+      <div class="hstat-val" id="hdr-total">0</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="quiz-container"></div>
+</main>
+
+<script>
+const QUESTIONS = [
+  {id:'f1', topic:'Relations', type:'tf', q:'True or False: A circle is a function.', answer:'false', working:'Fails vertical line test.'},
+  {id:'f2', topic:'Relations', type:'mcq', q:'Which is NOT a function?', options:['(1,2), (3,4)', '(1,2), (1,3)', '(2,1), (3,1)'], answer:'(1,2), (1,3)', working:'x=1 maps to two values.'},
+  {id:'fn1', topic:'Notation', type:'input', q:'If <span class="math">f(x) = x² + 2</span>, find <span class="math">f(3)</span>.', answer:'11', working:'3² + 2 = 11'},
+  {id:'ic1', topic:'Intercepts', type:'input', q:'Find the y-intercept of <span class="math">y = x³ + 3</span>.', answer:'3', working:'Set x=0.'},
+  {id:'dr1', topic:'Domain', type:'mcq', q:'Domain of <span class="math">f(x) = x²</span>?', options:['x ≥ 0', 'All real x', 'x < 0'], answer:'All real x', working:'Defined for all x.'},
+  {id:'su1', topic:'Surds', type:'input', q:'Simplify <span class="math">√12</span>. Enter the coefficient of <span class="math">√3</span>.', answer:'2', working:'√(4x3) = 2√3'},
+  {id:'il1', topic:'Indices', type:'input', q:'Simplify <span class="math">x⁴ × x⁵</span>. Enter the power.', answer:'9', working:'4 + 5 = 9'},
+  {id:'ef1', topic:'Algebra', type:'input', q:'Expand <span class="math">(x+2)(x+3)</span>. Constant term?', answer:'6', working:'2 * 3 = 6'}
+];
+
+let streak = 0;
+let totalCorrect = 0;
+let lastType = null;
+let currentQuestion = null;
+
+function getNextQuestion() {
+    // Filter to ensure next question is a different type than the last
+    let available = QUESTIONS.filter(q => q.type !== lastType);
+    // Pick random
+    let q = available[Math.floor(Math.random() * available.length)];
+    lastType = q.type;
+    return q;
+}
+
+function renderQuestion() {
+    currentQuestion = getNextQuestion();
+    const container = document.getElementById('quiz-container');
+    container.innerHTML = '';
+
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    
+    let actionHtml = '';
+    if(currentQuestion.type === 'input') {
+        actionHtml = `
+            <div class="answer-label">Your Answer</div>
+            <div class="input-row">
+                <input type="text" class="ans-input" id="ans-${currentQuestion.id}" placeholder="Type answer...">
+                <button class="check-btn" onclick="checkInputAnswer('${currentQuestion.id}')">Submit</button>
+            </div>`;
+    } else if(currentQuestion.type === 'mcq') {
+        actionHtml = `<div class="mcq-options">
+            ${currentQuestion.options.map(opt => `<button class="mcq-opt" onclick="checkChoiceAnswer('${currentQuestion.id}', '${opt}', this)">${opt}</button>`).join('')}
+        </div>`;
+    } else if(currentQuestion.type === 'tf') {
+        actionHtml = `<div class="mcq-options">
+            <button class="mcq-opt" onclick="checkChoiceAnswer('${currentQuestion.id}', 'true', this)">True</button>
+            <button class="mcq-opt" onclick="checkChoiceAnswer('${currentQuestion.id}', 'false', this)">False</button>
+        </div>`;
+    }
+
+    card.innerHTML = `
+        <div class="q-header">
+            <div class="q-num">Active</div>
+            <div class="q-text">${currentQuestion.q}</div>
+            <div class="q-topic">${currentQuestion.topic}</div>
+        </div>
+        <div class="q-body">
+            ${currentQuestion.note ? `<div class="q-note">${currentQuestion.note}</div>` : ''}
+            ${actionHtml}
+            <div id="fb-${currentQuestion.id}" class="feedback"></div>
+            <div id="next-wrap" class="next-wrap" style="display:none">
+                <button class="next-btn" onclick="renderQuestion()">Next Question →</button>
+            </div>
+        </div>
+    `;
+    container.appendChild(card);
+}
+
+function checkInputAnswer(id) {
+    const input = document.getElementById(`ans-${id}`);
+    const val = input.value.trim().toLowerCase();
+    const isCorrect = val === currentQuestion.answer.toLowerCase();
+    showFeedback(isCorrect);
+}
+
+function checkChoiceAnswer(id, val, btn) {
+    // Disable all buttons in this set
+    const opts = btn.parentElement.querySelectorAll('.mcq-opt');
+    opts.forEach(b => b.disabled = true);
+    
+    const isCorrect = val.toLowerCase() === currentQuestion.answer.toLowerCase();
+    btn.classList.add(isCorrect ? 'opt-correct' : 'opt-wrong');
+    showFeedback(isCorrect);
+}
+
+function showFeedback(correct) {
+    const fb = document.getElementById(`fb-${currentQuestion.id}`);
+    fb.className = `feedback show ${correct ? 'correct' : 'wrong'}`;
+    fb.innerHTML = `
+        <div class="fb-head">${correct ? 'Correct!' : 'Not quite...'}</div>
+        <div class="fb-ans">Answer: ${currentQuestion.answer}</div>
+        <div class="fb-working">${currentQuestion.working}</div>
+    `;
+    
+    if(correct) {
+        streak++;
+        totalCorrect++;
+    } else {
+        streak = 0;
+    }
+    
+    updateStats();
+    document.getElementById('next-wrap').style.display = 'flex';
+}
+
+function updateStats() {
+    document.getElementById('hdr-streak').innerText = streak;
+    document.getElementById('hdr-total').innerText = totalCorrect;
+}
+
+// Init
+renderQuestion();
+</script>
+</body>
+</html>
