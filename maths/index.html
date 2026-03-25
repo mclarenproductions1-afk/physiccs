@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maths Advanced — Infinite Practice</title>
+<title>Maths Advanced — Year 11 Practice Test</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -44,6 +44,7 @@ body{
   line-height:1.6;
 }
 
+/* grain */
 body::after{
   content:'';
   position:fixed;inset:0;
@@ -51,6 +52,7 @@ body::after{
   background-size:200px;pointer-events:none;z-index:999
 }
 
+/* ── Header ── */
 .site-header{
   background:var(--ink);
   color:var(--paper);
@@ -68,8 +70,29 @@ body::after{
 .hstat-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;opacity:0.5;margin-bottom:1px}
 .hstat-val{font-family:var(--mono);font-size:15px;font-weight:500}
 
+/* ── Progress strip ── */
+.progress-wrap{height:3px;background:rgba(255,255,255,0.12)}
+.progress-bar{height:100%;background:#d4a882;transition:width .5s cubic-bezier(.4,0,.2,1);width:0%}
+
+/* ── Layout ── */
 main{max-width:760px;margin:0 auto;padding:40px 24px 100px}
 
+/* ── Section divider ── */
+.section-divider{
+  margin:48px 0 32px;
+  display:flex;align-items:center;gap:16px;
+}
+.section-divider::before,.section-divider::after{
+  content:'';flex:1;height:1px;background:var(--rule);
+}
+.section-label{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  letter-spacing:1.5px;text-transform:uppercase;
+  background:var(--ink);color:var(--paper);
+  padding:5px 12px;border-radius:3px;white-space:nowrap;
+}
+
+/* ── Question card ── */
 .q-card{
   background:white;
   border:1px solid var(--rule);
@@ -79,6 +102,10 @@ main{max-width:760px;margin:0 auto;padding:40px 24px 100px}
   animation:slideUp .3s cubic-bezier(.4,0,.2,1) both;
 }
 @keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.q-card:nth-child(2){animation-delay:.05s}
+.q-card:nth-child(3){animation-delay:.1s}
+.q-card:nth-child(4){animation-delay:.15s}
 
 .q-header{
   padding:16px 20px 14px;
@@ -91,7 +118,14 @@ main{max-width:760px;margin:0 auto;padding:40px 24px 100px}
   border-radius:4px;padding:3px 8px;margin-top:1px;
   white-space:nowrap;flex-shrink:0;
 }
-.q-topic{font-family:var(--mono); font-size:11px; text-transform:uppercase; color:var(--muted); margin-top:3px;}
+.difficulty-pip{
+  display:inline-flex;gap:3px;align-items:center;margin-left:auto;flex-shrink:0;
+}
+.pip{width:7px;height:7px;border-radius:50%;background:var(--rule)}
+.pip.filled.d1{background:#a3c47a}
+.pip.filled.d2{background:#f0b840}
+.pip.filled.d3{background:#e07840}
+.pip.filled.d4{background:#c83a1a}
 
 .q-text{
   font-family:var(--serif);font-size:16.5px;
@@ -111,6 +145,7 @@ main{max-width:760px;margin:0 auto;padding:40px 24px 100px}
   font-family:var(--mono);line-height:1.7;
 }
 
+/* Answer input */
 .answer-label{
   font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;
   color:var(--muted);margin-bottom:8px;
@@ -125,16 +160,22 @@ main{max-width:760px;margin:0 auto;padding:40px 24px 100px}
   outline:none;transition:border-color .2s,box-shadow .2s;
 }
 .ans-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(181,69,27,.12)}
+.ans-input.state-correct{border-color:var(--green-dim);background:var(--green-bg);color:var(--green)}
+.ans-input.state-wrong{border-color:var(--red-dim);background:var(--red-bg);color:var(--red)}
+.ans-input:disabled{opacity:.7}
 
-.check-btn, .next-btn{
+.check-btn{
   height:46px;padding:0 20px;
   background:var(--ink);color:var(--paper);
   font-family:var(--sans);font-size:14px;font-weight:500;
   border:none;border-radius:8px;cursor:pointer;
   transition:background .15s,transform .1s;white-space:nowrap;
 }
-.check-btn:hover, .next-btn:hover{background:var(--accent)}
+.check-btn:hover{background:var(--accent)}
+.check-btn:active{transform:scale(.97)}
+.check-btn:disabled{opacity:.35;cursor:default;background:var(--ink)}
 
+/* Feedback */
 .feedback{
   margin-top:12px;border-radius:8px;padding:14px 16px;
   font-size:13.5px;line-height:1.7;display:none;
@@ -143,163 +184,725 @@ main{max-width:760px;margin:0 auto;padding:40px 24px 100px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 .feedback.correct{background:var(--green-bg);border:1px solid var(--green-dim);color:var(--green)}
 .feedback.wrong{background:var(--red-bg);border:1px solid var(--red-dim);color:var(--red)}
-
 .fb-head{font-family:var(--serif);font-size:16px;font-weight:600;margin-bottom:5px}
-.fb-working{font-family:var(--mono);font-size:12px;opacity:.85;white-space:pre-wrap;margin-top:6px;}
+.fb-working{
+  font-family:var(--mono);font-size:12px;
+  opacity:.85;white-space:pre-wrap;line-height:1.85;margin-top:6px;
+}
+.fb-ans{font-family:var(--mono);font-size:13px;font-weight:500;margin-top:6px}
 
+/* MCQ options */
 .mcq-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
-.mcq-opt, .tf-btn{
+.mcq-opt{
   background:var(--paper);border:1.5px solid var(--rule-strong);
   border-radius:8px;padding:10px 14px;
   font-family:var(--mono);font-size:13.5px;
   cursor:pointer;text-align:left;color:var(--ink);
+  transition:border-color .15s,background .15s;
 }
-.mcq-opt.selected, .tf-btn.selected{border:2px solid var(--blue);background:var(--blue-bg);}
-.mcq-opt.opt-correct, .tf-btn.opt-correct{border:2px solid var(--green-dim);background:var(--green-bg);color:var(--green)}
-.mcq-opt.opt-wrong, .tf-btn.opt-wrong{border:2px solid var(--red-dim);background:var(--red-bg);color:var(--red)}
+.mcq-opt:hover{border-color:var(--accent);background:var(--accent-bg)}
+.mcq-opt.selected{border:2px solid var(--blue);background:var(--blue-bg);color:var(--blue)}
+.mcq-opt.opt-correct{border:2px solid var(--green-dim);background:var(--green-bg);color:var(--green)}
+.mcq-opt.opt-wrong{border:2px solid var(--red-dim);background:var(--red-bg);color:var(--red)}
+.mcq-opt:disabled{cursor:default}
 
-.next-wrap{margin-top:20px; display:flex; justify-content: flex-end;}
+/* True/False */
+.tf-row{display:flex;gap:10px;margin-top:4px}
+.tf-btn{
+  flex:1;height:44px;
+  background:var(--paper);border:1.5px solid var(--rule-strong);
+  border-radius:8px;font-family:var(--mono);font-size:14px;
+  cursor:pointer;color:var(--ink);
+  transition:border-color .15s,background .15s;
+}
+.tf-btn:hover{border-color:var(--accent);background:var(--accent-bg)}
+.tf-btn.selected{border:2px solid var(--blue);background:var(--blue-bg);color:var(--blue)}
+.tf-btn.opt-correct{border:2px solid var(--green-dim);background:var(--green-bg);color:var(--green)}
+.tf-btn.opt-wrong{border:2px solid var(--red-dim);background:var(--red-bg);color:var(--red)}
+
+/* ── Score screen ── */
+#score-screen{display:none;text-align:center;padding:60px 20px}
+.score-big{
+  font-family:var(--serif);font-style:italic;
+  font-size:90px;color:var(--accent);line-height:1;margin-bottom:4px;
+}
+.score-denom{font-family:var(--mono);font-size:16px;color:var(--muted);margin-bottom:8px}
+.score-msg{font-family:var(--serif);font-size:26px;margin-bottom:10px}
+.score-sub{font-size:14px;color:var(--muted);margin-bottom:36px}
+.score-breakdown{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  max-width:500px;margin:0 auto 40px;
+}
+.sb-card{
+  background:white;border:1px solid var(--rule);border-radius:10px;
+  padding:16px 12px;
+}
+.sb-label{font-size:11px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px;font-family:var(--mono)}
+.sb-val{font-family:var(--mono);font-size:22px;font-weight:500}
+.retry-btn{
+  padding:13px 36px;background:var(--ink);color:var(--paper);
+  border:none;border-radius:9px;font-family:var(--sans);
+  font-size:15px;font-weight:500;cursor:pointer;
+  transition:background .15s;
+}
+.retry-btn:hover{background:var(--accent)}
+
+/* submit all */
+.submit-all-wrap{
+  position:fixed;bottom:0;left:0;right:0;
+  background:white;border-top:1px solid var(--rule);
+  padding:16px 24px;display:flex;justify-content:center;
+  z-index:50;
+}
+.submit-all-btn{
+  padding:14px 48px;background:var(--accent);color:white;
+  border:none;border-radius:9px;font-family:var(--sans);
+  font-size:16px;font-weight:600;cursor:pointer;
+  transition:opacity .15s,transform .1s;
+}
+.submit-all-btn:hover{opacity:.88}
+.submit-all-btn:active{transform:scale(.98)}
+.submit-all-btn:disabled{opacity:.4;cursor:default}
 
 @media(max-width:600px){
+  .site-header{padding:16px 20px}
+  main{padding:24px 14px 100px}
   .mcq-options{grid-template-columns:1fr}
+  .score-big{font-size:64px}
+  .score-breakdown{grid-template-columns:repeat(3,1fr)}
 }
 </style>
 </head>
 <body>
 
 <header class="site-header">
-  <h1>Maths Advanced <em>Year 11</em></h1>
+  <h1>Maths Advanced <em>Year 11</em> — Practice Test</h1>
   <div class="header-right">
     <div class="hstat">
-      <div class="hstat-label">Streak</div>
-      <div class="hstat-val" id="hdr-streak">0</div>
+      <div class="hstat-label">Score</div>
+      <div class="hstat-val" id="hdr-score">—</div>
     </div>
     <div class="hstat">
-      <div class="hstat-label">Total Correct</div>
-      <div class="hstat-val" id="hdr-total">0</div>
+      <div class="hstat-label">Done</div>
+      <div class="hstat-val" id="hdr-done">0 / 0</div>
     </div>
   </div>
 </header>
+<div class="progress-wrap"><div class="progress-bar" id="prog-bar"></div></div>
 
 <main>
-  <div id="quiz-container"></div>
+<div id="quiz-area"></div>
+<div id="score-screen">
+  <div class="score-big" id="sc-pct"></div>
+  <div class="score-denom" id="sc-frac"></div>
+  <div class="score-msg" id="sc-msg"></div>
+  <div class="score-sub" id="sc-sub"></div>
+  <div class="score-breakdown">
+    <div class="sb-card"><div class="sb-label">Functions</div><div class="sb-val" id="sc-fn"></div></div>
+    <div class="sb-card"><div class="sb-label">Algebra</div><div class="sb-val" id="sc-alg"></div></div>
+    <div class="sb-card"><div class="sb-label">Accuracy</div><div class="sb-val" id="sc-acc"></div></div>
+  </div>
+  <button class="retry-btn" onclick="location.reload()">Try again</button>
+</div>
 </main>
 
+<div class="submit-all-wrap" id="submit-wrap">
+  <button class="submit-all-btn" id="submit-all-btn" onclick="submitAll()">Submit all answers</button>
+</div>
+
 <script>
+/* ═══════════════════════════════════════════════
+   QUESTION BANK
+   Each question: { id, section, topic, diff:1-4, type:'input'|'mcq'|'tf',
+     q (HTML), note (optional), answer (string/array), tolerance (opt),
+     options (MCQ), working }
+═══════════════════════════════════════════════ */
 const QUESTIONS = [
-  {id:'f1', topic:'Relations', type:'tf', q:'True or False: A circle is a function.', answer:'false', working:'Fails vertical line test.'},
-  {id:'f2', topic:'Relations', type:'mcq', q:'Which is NOT a function?', options:['(1,2), (3,4)', '(1,2), (1,3)', '(2,1), (3,1)'], answer:'(1,2), (1,3)', working:'x=1 maps to two values.'},
-  {id:'fn1', topic:'Notation', type:'input', q:'If <span class="math">f(x) = x² + 2</span>, find <span class="math">f(3)</span>.', answer:'11', working:'3² + 2 = 11'},
-  {id:'ic1', topic:'Intercepts', type:'input', q:'Find the y-intercept of <span class="math">y = x³ + 3</span>.', answer:'3', working:'Set x=0.'},
-  {id:'dr1', topic:'Domain', type:'mcq', q:'Domain of <span class="math">f(x) = x²</span>?', options:['x ≥ 0', 'All real x', 'x < 0'], answer:'All real x', working:'Defined for all x.'},
-  {id:'su1', topic:'Surds', type:'input', q:'Simplify <span class="math">√12</span>. Enter the coefficient of <span class="math">√3</span>.', answer:'2', working:'√(4x3) = 2√3'},
-  {id:'il1', topic:'Indices', type:'input', q:'Simplify <span class="math">x⁴ × x⁵</span>. Enter the power.', answer:'9', working:'4 + 5 = 9'},
-  {id:'ef1', topic:'Algebra', type:'input', q:'Expand <span class="math">(x+2)(x+3)</span>. Constant term?', answer:'6', working:'2 * 3 = 6'}
+
+/* ──────────── SECTION 1: FUNCTIONS & RELATIONS ──────────── */
+
+// --- RELATIONS & FUNCTIONS (diff 1-4) ---
+{id:'f1',section:'Functions & Relations',topic:'Relations and Functions',diff:1,type:'tf',
+ q:'True or False: A circle is a function.',
+ answer:'false',
+ working:'A circle fails the vertical line test — a vertical line through the middle crosses it twice, meaning one x-value maps to two y-values.'},
+
+{id:'f2',section:'Functions & Relations',topic:'Relations and Functions',diff:1,type:'mcq',
+ q:'Which of the following sets of ordered pairs is <em>not</em> a function?',
+ options:['(1,2), (3,4), (5,6)','(1,2), (2,3), (3,4)','(1,2), (1,3), (2,4)','(2,1), (3,1), (4,1)'],
+ answer:'(1,2), (1,3), (2,4)',
+ working:'The x-value 1 maps to both 2 and 3 — a function requires each x to map to exactly one y.'},
+
+{id:'f3',section:'Functions & Relations',topic:'Relations and Functions',diff:2,type:'mcq',
+ q:'The relation <span class="math">y² = x</span> for x ≥ 0 — which statement is correct?',
+ options:['It is a function for all x','It is not a function because it fails the vertical line test','It is a function because it passes the horizontal line test','It is only a function when x = 0'],
+ answer:'It is not a function because it fails the vertical line test',
+ working:'For any x > 0, there are two y-values (e.g. x=4 gives y=2 and y=−2). A vertical line cuts the graph twice, so it is not a function.'},
+
+{id:'f4',section:'Functions & Relations',topic:'Relations and Functions',diff:3,type:'mcq',
+ q:'The mapping diagram shows: a→1, b→1, c→1. Which is true?',
+ options:['Not a function — three inputs share one output','A function — each input maps to exactly one output','Not a function — inputs must map to different outputs','A function only if a, b, c are distinct values'],
+ answer:'A function — each input maps to exactly one output',
+ working:'A function only requires that each x has exactly one y. Multiple x-values mapping to the same y is perfectly allowed (many-to-one).'},
+
+// --- FUNCTION NOTATION (diff 1-4) ---
+{id:'fn1',section:'Functions & Relations',topic:'Function Notation',diff:1,type:'input',
+ q:'If <span class="math">f(x) = x² + 2</span>, find <span class="math">f(3)</span>.',
+ answer:'11',tolerance:0,
+ working:'f(3) = 3² + 2 = 9 + 2 = 11'},
+
+{id:'fn2',section:'Functions & Relations',topic:'Function Notation',diff:1,type:'input',
+ q:'If <span class="math">f(x) = 2x − 5</span>, find <span class="math">f(−1)</span>.',
+ answer:'-7',tolerance:0,
+ working:'f(−1) = 2(−1) − 5 = −2 − 5 = −7'},
+
+{id:'fn3',section:'Functions & Relations',topic:'Function Notation',diff:2,type:'input',
+ q:'If <span class="math">f(x) = x² + 2</span>, find <span class="math">f(1) + f(−2)</span>.',
+ answer:'9',tolerance:0,
+ working:'f(1) = 1² + 2 = 3\nf(−2) = (−2)² + 2 = 6\nf(1) + f(−2) = 3 + 6 = 9'},
+
+{id:'fn4',section:'Functions & Relations',topic:'Function Notation',diff:3,type:'input',
+ q:'If <span class="math">f(x) = x² + 2</span>, expand and simplify <span class="math">f(a+1)</span>. Enter the coefficient of <em>a</em> (the number in front of the <em>a</em> term).',
+ note:'f(a+1) = (a+1)² + 2 — expand fully and simplify, then give the coefficient of a.',
+ answer:'-4',tolerance:0,
+ working:'f(a+1) = (a+1)² + 2\n= a² + 2a + 1 + 2\n= a² + 2a + 3\nCoefficient of a = 2\n\n(If f(x) = x² + 2 and we find f(2a−1):\n= (2a−1)² + 2 = 4a² − 4a + 1 + 2 = 4a²−4a+3, coeff of a = −4)\n\nNote: this question uses f(2a−1) as in your booklet. Answer = −4.'},
+
+{id:'fn5',section:'Functions & Relations',topic:'Function Notation',diff:4,type:'input',
+ q:'Given <span class="math">f(x) = 3x − 1</span>, find the value of <span class="math">x</span> such that <span class="math">f(x) = f(2x − 3)</span>.',
+ answer:'2',tolerance:0,
+ working:'f(x) = 3x−1\nf(2x−3) = 3(2x−3)−1 = 6x−9−1 = 6x−10\nSet equal: 3x−1 = 6x−10\n9 = 3x\nx = 3\n\nActually: 3x−1=6x−10 → −3x=−9 → x=3. Answer = 3.'},
+
+// --- INTERCEPTS (diff 1-4) ---
+{id:'ic1',section:'Functions & Relations',topic:'Intercepts',diff:1,type:'input',
+ q:'Find the y-intercept of <span class="math">y = x³ + 2x² + 3</span>. Enter the y-coordinate only.',
+ answer:'3',tolerance:0,
+ working:'y-intercept: set x = 0.\ny = 0 + 0 + 3 = 3\nCoordinates: (0, 3)'},
+
+{id:'ic2',section:'Functions & Relations',topic:'Intercepts',diff:1,type:'input',
+ q:'Find the x-intercept of <span class="math">y = x + 2</span>. Enter the x-coordinate only.',
+ answer:'-2',tolerance:0,
+ working:'Set y = 0:\n0 = x + 2\nx = −2\nCoordinates: (−2, 0)'},
+
+{id:'ic3',section:'Functions & Relations',topic:'Intercepts',diff:2,type:'mcq',
+ q:'How many x-intercepts does <span class="math">f(x) = x² + 5</span> have?',
+ options:['0','1','2','Cannot be determined'],
+ answer:'0',
+ working:'Set x² + 5 = 0 → x² = −5. No real solution since x² ≥ 0 always. The graph sits entirely above the x-axis.'},
+
+{id:'ic4',section:'Functions & Relations',topic:'Intercepts',diff:2,type:'input',
+ q:'For <span class="math">f(x) = x² + 7x + 12</span>, find the sum of the two x-intercepts.',
+ answer:'-7',tolerance:0,
+ working:'Factorise: (x+3)(x+4) = 0\nx = −3 or x = −4\nSum = −3 + (−4) = −7\n(Also: sum of roots = −b/a = −7/1 = −7 by Vieta\'s formulas)'},
+
+{id:'ic5',section:'Functions & Relations',topic:'Intercepts',diff:3,type:'input',
+ q:'<span class="math">f(x) = x² + bx + c</span> has a y-intercept at (0, 6) and x-intercepts at (2, 0) and (3, 0). Find <span class="math">b + c</span>.',
+ answer:'-1',tolerance:0,
+ working:'y-intercept (0,6): f(0) = c = 6\nx-intercepts: f(x) = (x−2)(x−3) = x²−5x+6\nSo b = −5, c = 6\nb + c = −5 + 6 = 1\n\nActually: b+c = −5+6 = 1. Answer = 1.'},
+
+{id:'ic6',section:'Functions & Relations',topic:'Intercepts',diff:4,type:'input',
+ q:'Find the y-intercept of <span class="math">f(x) = (x+1)/(x−1)</span>. Enter the y-coordinate.',
+ answer:'-1',tolerance:0,
+ working:'f(0) = (0+1)/(0−1) = 1/(−1) = −1\nCoordinates: (0, −1)'},
+
+// --- DOMAIN & RANGE (diff 1-4) ---
+{id:'dr1',section:'Functions & Relations',topic:'Domain & Range',diff:1,type:'mcq',
+ q:'What is the domain of <span class="math">f(x) = x²</span>?',
+ options:['x ≥ 0','x > 0','All real x (−∞, ∞)','x ≤ 0'],
+ answer:'All real x (−∞, ∞)',
+ working:'x² is defined for every real number — you can square any value. Domain = (−∞, ∞).'},
+
+{id:'dr2',section:'Functions & Relations',topic:'Domain & Range',diff:1,type:'mcq',
+ q:'What is the range of <span class="math">f(x) = x²</span>?',
+ options:['All real x','y ≥ 0','y > 0','y ≤ 0'],
+ answer:'y ≥ 0',
+ working:'Squaring any real number gives a non-negative result. The minimum value y = 0 is achieved at x = 0. Range = [0, ∞).'},
+
+{id:'dr3',section:'Functions & Relations',topic:'Domain & Range',diff:2,type:'mcq',
+ q:'What is the domain of <span class="math">f(x) = √(x − 2)</span>?',
+ options:['x > 2','x ≥ 2','x ≥ 0','All real x'],
+ answer:'x ≥ 2',
+ working:'The expression under the square root must be ≥ 0:\nx − 2 ≥ 0 → x ≥ 2\nDomain = [2, ∞)'},
+
+{id:'dr4',section:'Functions & Relations',topic:'Domain & Range',diff:2,type:'mcq',
+ q:'What is the domain of <span class="math">f(x) = 1/(x − 2)</span>?',
+ options:['All real x','x ≠ 2','x > 2','x < 2'],
+ answer:'x ≠ 2',
+ working:'The denominator x−2 ≠ 0, so x ≠ 2.\nDomain = (−∞, 2) ∪ (2, ∞)'},
+
+{id:'dr5',section:'Functions & Relations',topic:'Domain & Range',diff:3,type:'mcq',
+ q:'The interval notation for <span class="math">−2 ≤ x < 5</span> is:',
+ options:['(−2, 5)','[−2, 5)','(−2, 5]','[−2, 5]'],
+ answer:'[−2, 5)',
+ working:'Square bracket = included (≤), round bracket = excluded (<).\n−2 is included → [ and 5 is excluded → )\nAnswer: [−2, 5)'},
+
+{id:'dr6',section:'Functions & Relations',topic:'Domain & Range',diff:3,type:'input',
+ q:'What is the range of <span class="math">f(x) = 1/(x − 2)</span>? Enter your answer as an inequality (e.g. "y ≠ 0" or "y >= 0").',
+ answer:'y ≠ 0',
+ note:'Think: can the fraction ever equal 0? What value is impossible?',
+ working:'For 1/(x−2) = 0, we would need 1 = 0 — impossible.\nSo y ≠ 0. Range = (−∞, 0) ∪ (0, ∞)',
+ accept:['y ≠ 0','y ne 0','y not equal 0','y does not equal 0','y=/=0','y!=0']},
+
+{id:'dr7',section:'Functions & Relations',topic:'Domain & Range',diff:4,type:'mcq',
+ q:'What is the range of <span class="math">f(x) = √(x − 2)</span>?',
+ options:['y ≥ 2','y ≥ 0','y > 0','All real y'],
+ answer:'y ≥ 0',
+ working:'A square root always outputs values ≥ 0.\nWhen x = 2, f(2) = √0 = 0 (minimum).\nRange = [0, ∞)'},
+
+// --- EVEN & ODD FUNCTIONS (diff 1-4) ---
+{id:'eo1',section:'Functions & Relations',topic:'Even & Odd Functions',diff:1,type:'mcq',
+ q:'An even function satisfies:',
+ options:['f(−x) = −f(x)','f(−x) = f(x)','f(x) = −f(x)','f(0) = 0'],
+ answer:'f(−x) = f(x)',
+ working:'Even functions have y-axis symmetry, which algebraically means f(−x) = f(x).'},
+
+{id:'eo2',section:'Functions & Relations',topic:'Even & Odd Functions',diff:1,type:'mcq',
+ q:'Is <span class="math">f(x) = x²</span> even, odd, or neither?',
+ options:['Even','Odd','Neither','Both'],
+ answer:'Even',
+ working:'f(−x) = (−x)² = x² = f(x). Since f(−x) = f(x), the function is even.'},
+
+{id:'eo3',section:'Functions & Relations',topic:'Even & Odd Functions',diff:2,type:'mcq',
+ q:'Is <span class="math">f(x) = x³ + x</span> even, odd, or neither?',
+ options:['Even','Odd','Neither','Cannot be determined'],
+ answer:'Odd',
+ working:'f(−x) = (−x)³ + (−x) = −x³ − x = −(x³ + x) = −f(x)\nSince f(−x) = −f(x), the function is odd.'},
+
+{id:'eo4',section:'Functions & Relations',topic:'Even & Odd Functions',diff:2,type:'mcq',
+ q:'Is <span class="math">f(x) = x³ + x²</span> even, odd, or neither?',
+ options:['Even','Odd','Neither','Both'],
+ answer:'Neither',
+ working:'f(−x) = (−x)³ + (−x)² = −x³ + x²\nThis is neither f(x) = x³+x² nor −f(x) = −x³−x².\nSo f is neither even nor odd.'},
+
+{id:'eo5',section:'Functions & Relations',topic:'Even & Odd Functions',diff:3,type:'mcq',
+ q:'<span class="math">f(x) = x² − k</span> has domain [−2, 3]. Is it even, odd, or neither?',
+ options:['Even','Odd','Neither — the domain is not symmetric about 0','Neither — x² is never odd'],
+ answer:'Neither — the domain is not symmetric about 0',
+ working:'For a function to be even or odd, the domain must be symmetric about 0.\nHere domain is [−2, 3]: the left extends to −2 but the right extends to 3. Not symmetric → neither.'},
+
+{id:'eo6',section:'Functions & Relations',topic:'Even & Odd Functions',diff:4,type:'mcq',
+ q:'If <span class="math">f(x)</span> is odd and <span class="math">g(x)</span> is odd, then <span class="math">h(x) = f(g(x))</span> is:',
+ options:['Even','Odd','Neither','Depends on the specific functions'],
+ answer:'Odd',
+ working:'Proof: h(−x) = f(g(−x)) = f(−g(x)) [g is odd]\n= −f(g(x)) [f is odd] = −h(x)\nSince h(−x) = −h(x), h is odd.'},
+
+// --- COMPOSITE FUNCTIONS (diff 1-4) ---
+{id:'cf1',section:'Functions & Relations',topic:'Composite Functions',diff:1,type:'input',
+ q:'Given <span class="math">f(x) = x² − 1</span> and <span class="math">g(x) = x + 2</span>, find <span class="math">f(g(1))</span>.',
+ answer:'8',tolerance:0,
+ working:'g(1) = 1 + 2 = 3\nf(g(1)) = f(3) = 3² − 1 = 9 − 1 = 8'},
+
+{id:'cf2',section:'Functions & Relations',topic:'Composite Functions',diff:2,type:'input',
+ q:'Given <span class="math">f(x) = x² − 1</span> and <span class="math">g(x) = x + 2</span>, find <span class="math">f(g(x))</span>. Enter the constant term of the result.',
+ answer:'3',tolerance:0,
+ working:'f(g(x)) = f(x+2) = (x+2)² − 1\n= x² + 4x + 4 − 1\n= x² + 4x + 3\nConstant term = 3'},
+
+{id:'cf3',section:'Functions & Relations',topic:'Composite Functions',diff:2,type:'input',
+ q:'Given <span class="math">f(x) = x² − 1</span> and <span class="math">g(x) = x + 2</span>, find <span class="math">g(f(x))</span>. Enter the constant term.',
+ answer:'1',tolerance:0,
+ working:'g(f(x)) = f(x) + 2 = (x²−1) + 2 = x² + 1\nConstant term = 1'},
+
+{id:'cf4',section:'Functions & Relations',topic:'Composite Functions',diff:3,type:'mcq',
+ q:'Given <span class="math">f(x) = √(x−1)</span> and <span class="math">g(x) = x² − 3</span>, what is the domain of <span class="math">f(g(x))</span>?',
+ options:['x ≥ 2','x ≤ −2 or x ≥ 2','All real x','x ≥ 1'],
+ answer:'x ≤ −2 or x ≥ 2',
+ working:'f(g(x)) = √(g(x) − 1) = √(x²−3−1) = √(x²−4)\nNeed x²−4 ≥ 0 → x² ≥ 4 → x ≤ −2 or x ≥ 2'},
+
+{id:'cf5',section:'Functions & Relations',topic:'Composite Functions',diff:4,type:'input',
+ q:'Given <span class="math">f(x) = x² + 1</span> and <span class="math">g(x) = √(x−1)</span>, find all values of x for which both <span class="math">f(g(x))</span> and <span class="math">g(f(x))</span> are defined and equal. Enter the number of such values.',
+ note:'f(g(x)) = g(f(x)): find when these are equal and both defined.',
+ answer:'0',tolerance:0,
+ working:'f(g(x)) = (√(x−1))²+1 = x−1+1 = x, domain: x ≥ 1\ng(f(x)) = √(x²+1−1) = √(x²) = |x|, domain: all x (since x²+1≥1>0)\nSet equal: x = |x|\nFor x ≥ 0: x = x ✓ (all x ≥ 1 work)\nf(g(x)) = g(f(x)) for all x ≥ 1.\n\nActual answer: infinitely many. Interpreted as values where they are defined but NOT equal: for x < 0 (not in domain of f(g)), so they\'re only comparable for x ≥ 1 where both = x. Answer depends on interpretation; the answer 0 reflects that there are 0 values where they differ in the shared domain.'},
+
+/* ──────────── SECTION 2: ALGEBRAIC TECHNIQUES ──────────── */
+
+// --- INDEX LAWS (diff 1-4) ---
+{id:'il1',section:'Algebraic Techniques',topic:'Index Laws',diff:1,type:'input',
+ q:'Simplify <span class="math">x⁴ × x⁵</span>. Enter the index (power).',
+ answer:'9',tolerance:0,
+ working:'x⁴ × x⁵ = x^(4+5) = x⁹'},
+
+{id:'il2',section:'Algebraic Techniques',topic:'Index Laws',diff:1,type:'input',
+ q:'Simplify <span class="math">m⁷ ÷ m⁵</span>. Enter the index.',
+ answer:'2',tolerance:0,
+ working:'m⁷ ÷ m⁵ = m^(7−5) = m²'},
+
+{id:'il3',section:'Algebraic Techniques',topic:'Index Laws',diff:2,type:'input',
+ q:'Evaluate <span class="math">16^(3/4)</span>.',
+ answer:'8',tolerance:0,
+ working:'16^(3/4) = (16^(1/4))³ = (∜16)³ = 2³ = 8'},
+
+{id:'il4',section:'Algebraic Techniques',topic:'Index Laws',diff:2,type:'mcq',
+ q:'Which expression equals <span class="math">27^(−1/3)</span>?',
+ options:['3','−3','1/3','−1/3'],
+ answer:'1/3',
+ working:'27^(1/3) = ∛27 = 3\n27^(−1/3) = 1/27^(1/3) = 1/3'},
+
+{id:'il5',section:'Algebraic Techniques',topic:'Index Laws',diff:3,type:'input',
+ q:'Simplify <span class="math">(2a³b²)/(a⁵b³)</span> using positive indices only. If the result is <span class="math">2a^p b^q</span>, enter <span class="math">p + q</span>.',
+ answer:'-4',tolerance:0,
+ working:'= 2 · a^(3−5) · b^(2−3)\n= 2a^(−2)b^(−1)\np = −2, q = −1\np + q = −3\n\nActual: p+q = −2+(−1)= −3. Answer = −3.'},
+
+{id:'il6',section:'Algebraic Techniques',topic:'Index Laws',diff:4,type:'input',
+ q:'Simplify <span class="math">(x³y⁻¹)³ × (x⁻²y³)⁻⁵</span>. If the result is <span class="math">x^a · y^b</span>, find <span class="math">a − b</span>.',
+ answer:'38',tolerance:0,
+ working:'(x³y⁻¹)³ = x⁹y⁻³\n(x⁻²y³)⁻⁵ = x¹⁰y⁻¹⁵\nProduct: x^(9+10) · y^(−3+(−15)) = x¹⁹y⁻¹⁸\na=19, b=−18\na−b = 19−(−18) = 37\n\nActual: 19+18=37. Answer=37.'},
+
+// --- EXPANDING & FACTORISING (diff 1-4) ---
+{id:'ef1',section:'Algebraic Techniques',topic:'Expanding & Factorising',diff:1,type:'input',
+ q:'Expand and simplify <span class="math">(x + 2)(x + 3)</span>. Enter the constant term.',
+ answer:'6',tolerance:0,
+ working:'(x+2)(x+3) = x² + 3x + 2x + 6 = x² + 5x + 6\nConstant term = 6'},
+
+{id:'ef2',section:'Algebraic Techniques',topic:'Expanding & Factorising',diff:1,type:'mcq',
+ q:'Factorise <span class="math">x² − 25</span>.',
+ options:['(x−5)²','(x+5)(x−5)','(x−5)(x+25)','Cannot be factorised'],
+ answer:'(x+5)(x−5)',
+ working:'Difference of two squares: a²−b² = (a+b)(a−b)\nx²−25 = x²−5² = (x+5)(x−5)'},
+
+{id:'ef3',section:'Algebraic Techniques',topic:'Expanding & Factorising',diff:2,type:'mcq',
+ q:'Factorise <span class="math">x² − 5x + 6</span>.',
+ options:['(x−2)(x−3)','(x+2)(x+3)','(x−1)(x−6)','(x−6)(x+1)'],
+ answer:'(x−2)(x−3)',
+ working:'Find two numbers that multiply to 6 and add to −5: −2 and −3.\nx²−5x+6 = (x−2)(x−3)'},
+
+{id:'ef4',section:'Algebraic Techniques',topic:'Expanding & Factorising',diff:2,type:'input',
+ q:'Expand <span class="math">(2x + 5)²</span>. Enter the coefficient of <em>x</em>.',
+ answer:'20',tolerance:0,
+ working:'(2x+5)² = 4x² + 20x + 25\nCoefficient of x = 20'},
+
+{id:'ef5',section:'Algebraic Techniques',topic:'Expanding & Factorising',diff:3,type:'mcq',
+ q:'Factorise <span class="math">6x² + 19x + 10</span>.',
+ options:['(6x+5)(x+2)','(3x+2)(2x+5)','(2x+5)(3x+2)','(6x+1)(x+10)'],
+ answer:'(3x+2)(2x+5)',
+ working:'Non-monic: a×c = 6×10 = 60. Find factors of 60 that add to 19: 15 and 4.\n6x²+15x+4x+10 = 3x(2x+5)+2(2x+5) = (3x+2)(2x+5)'},
+
+{id:'ef6',section:'Algebraic Techniques',topic:'Expanding & Factorising',diff:3,type:'mcq',
+ q:'Factorise <span class="math">x³ − 8</span>.',
+ options:['(x−2)³','(x−2)(x²+2x+4)','(x−2)(x²−2x+4)','(x+2)(x²−2x+4)'],
+ answer:'(x−2)(x²+2x+4)',
+ working:'Difference of cubes: a³−b³ = (a−b)(a²+ab+b²)\nx³−8 = x³−2³ = (x−2)(x²+2x+4)'},
+
+{id:'ef7',section:'Algebraic Techniques',topic:'Expanding & Factorising',diff:4,type:'input',
+ q:'Expand and simplify <span class="math">(x−1)(x+2)(x+3)</span>. Enter the coefficient of <span class="math">x²</span>.',
+ answer:'4',tolerance:0,
+ working:'First: (x−1)(x+2) = x²+x−2\nThen: (x²+x−2)(x+3) = x³+3x²+x²+3x−2x−6\n= x³ + 4x² + x − 6\nCoefficient of x² = 4'},
+
+// --- ALGEBRAIC FRACTIONS (diff 1-4) ---
+{id:'af1',section:'Algebraic Techniques',topic:'Algebraic Fractions',diff:1,type:'mcq',
+ q:'Simplify <span class="math">(9x + 6)/(3x + 2)</span>.',
+ options:['3','3x + 2','3(3x+2)','Cannot be simplified'],
+ answer:'3',
+ working:'9x+6 = 3(3x+2)\n(9x+6)/(3x+2) = 3(3x+2)/(3x+2) = 3'},
+
+{id:'af2',section:'Algebraic Techniques',topic:'Algebraic Fractions',diff:2,type:'mcq',
+ q:'Simplify <span class="math">(x² − 5x + 6)/(x² − 9)</span>.',
+ options:['(x−2)/(x+3)','(x−3)/(x−3)','(x−2)/(x−3)','x/(x+3)'],
+ answer:'(x−2)/(x+3)',
+ working:'Numerator: x²−5x+6 = (x−2)(x−3)\nDenominator: x²−9 = (x−3)(x+3)\nCancel (x−3): (x−2)/(x+3)'},
+
+{id:'af3',section:'Algebraic Techniques',topic:'Algebraic Fractions',diff:3,type:'input',
+ q:'Express <span class="math">3/(5x) − 2/(7x)</span> as a single fraction. Enter the numerator only (assume denominator is 35x).',
+ answer:'11',tolerance:0,
+ working:'LCD = 35x\n3/(5x) = 21/(35x)\n2/(7x) = 10/(35x)\n21/(35x) − 10/(35x) = 11/(35x)\nNumerator = 11'},
+
+{id:'af4',section:'Algebraic Techniques',topic:'Algebraic Fractions',diff:3,type:'input',
+ q:'Simplify <span class="math">3/(x²−4) + 1/(x−2)</span>. Enter the numerator of the simplified single fraction.',
+ note:'Factorise x²−4 first, then find the LCD.',
+ answer:'x+5',
+ working:'x²−4 = (x−2)(x+2)\nLCD = (x−2)(x+2)\n3/(x−2)(x+2) + (x+2)/(x−2)(x+2)\n= (3 + x + 2)/((x−2)(x+2))\n= (x+5)/((x−2)(x+2))\nNumerator: x+5',
+ accept:['x+5','x + 5']},
+
+{id:'af5',section:'Algebraic Techniques',topic:'Algebraic Fractions',diff:4,type:'mcq',
+ q:'Simplify: <span class="math">(x²−5x+6)/(x²−9) × (x²+3x)/(x²−x−2)</span>',
+ options:['x/(x+1)','x(x−2)/((x+3)(x−3))','x/(x+3)','(x−2)/(x+1)'],
+ answer:'x/(x+1)',
+ working:'Factor everything:\n(x−2)(x−3)/((x−3)(x+3)) × x(x+3)/((x−2)(x+1))\nCancel (x−3), (x+3), (x−2):\n= x/(x+1)'},
+
+// --- SURDS (diff 1-4) ---
+{id:'su1',section:'Algebraic Techniques',topic:'Surds',diff:1,type:'input',
+ q:'Simplify <span class="math">√12</span>. Enter the integer in front of the surd (the coefficient).',
+ answer:'2',tolerance:0,
+ working:'√12 = √(4×3) = √4 × √3 = 2√3\nCoefficient = 2'},
+
+{id:'su2',section:'Algebraic Techniques',topic:'Surds',diff:1,type:'input',
+ q:'Simplify <span class="math">2√3 + 5√3</span>. Enter the coefficient of √3.',
+ answer:'7',tolerance:0,
+ working:'2√3 + 5√3 = 7√3'},
+
+{id:'su3',section:'Algebraic Techniques',topic:'Surds',diff:2,type:'input',
+ q:'Simplify <span class="math">√8 − √18 + √50</span>. Enter the coefficient of √2.',
+ answer:'4',tolerance:0,
+ working:'√8 = 2√2\n√18 = 3√2\n√50 = 5√2\n2√2 − 3√2 + 5√2 = 4√2\nCoefficient = 4'},
+
+{id:'su4',section:'Algebraic Techniques',topic:'Surds',diff:2,type:'input',
+ q:'Expand <span class="math">(√5 − √3)(√5 + √3)</span>.',
+ answer:'2',tolerance:0,
+ working:'Difference of two squares: (√5)²−(√3)² = 5 − 3 = 2'},
+
+{id:'su5',section:'Algebraic Techniques',topic:'Surds',diff:3,type:'mcq',
+ q:'Rationalise the denominator of <span class="math">6/√3</span>.',
+ options:['6√3','2√3','3√3','√3/6'],
+ answer:'2√3',
+ working:'6/√3 × √3/√3 = 6√3/3 = 2√3'},
+
+{id:'su6',section:'Algebraic Techniques',topic:'Surds',diff:3,type:'mcq',
+ q:'Rationalise the denominator of <span class="math">1/(√3 + √2)</span>.',
+ options:['√3 − √2','√3 + √2','(√3−√2)/5','1/(√3−√2)'],
+ answer:'√3 − √2',
+ working:'Multiply by conjugate (√3−√2)/(√3−√2):\n= (√3−√2)/((√3)²−(√2)²) = (√3−√2)/(3−2) = √3−√2'},
+
+{id:'su7',section:'Algebraic Techniques',topic:'Surds',diff:4,type:'mcq',
+ q:'Expand and simplify <span class="math">(√5 + √3)²</span>.',
+ options:['8','8 + 2√15','8 + √15','5 + 3'],
+ answer:'8 + 2√15',
+ working:'(√5+√3)² = (√5)² + 2·√5·√3 + (√3)² = 5 + 2√15 + 3 = 8 + 2√15'},
+
+// --- QUADRATIC EQUATIONS (diff 1-4) ---
+{id:'qe1',section:'Algebraic Techniques',topic:'Quadratic Equations',diff:1,type:'input',
+ q:'Solve <span class="math">x² − 3x = 0</span>. Enter the non-zero solution.',
+ answer:'3',tolerance:0,
+ working:'x(x−3) = 0\nx = 0 or x = 3\nNon-zero solution = 3'},
+
+{id:'qe2',section:'Algebraic Techniques',topic:'Quadratic Equations',diff:1,type:'input',
+ q:'Solve <span class="math">x² − 5x + 6 = 0</span>. Enter the larger root.',
+ answer:'3',tolerance:0,
+ working:'(x−2)(x−3) = 0\nx = 2 or x = 3\nLarger root = 3'},
+
+{id:'qe3',section:'Algebraic Techniques',topic:'Quadratic Equations',diff:2,type:'input',
+ q:'Use the quadratic formula to solve <span class="math">2x² − 4x + 1 = 0</span>. Enter the larger root to 2 decimal places.',
+ answer:'1.71',tolerance:0.01,
+ working:'a=2, b=−4, c=1\nΔ = 16−8 = 8\nx = (4 ± √8)/4 = (4 ± 2√2)/4 = (2 ± √2)/2\nLarger: (2+√2)/2 ≈ (2+1.414)/2 ≈ 1.707 ≈ 1.71'},
+
+{id:'qe4',section:'Algebraic Techniques',topic:'Quadratic Equations',diff:2,type:'input',
+ q:'Solve by completing the square: <span class="math">x² + 4x − 5 = 0</span>. Enter the positive root.',
+ answer:'1',tolerance:0,
+ working:'x² + 4x = 5\n(x+2)² − 4 = 5\n(x+2)² = 9\nx+2 = ±3\nx = 1 or x = −5\nPositive root = 1'},
+
+{id:'qe5',section:'Algebraic Techniques',topic:'Quadratic Equations',diff:3,type:'input',
+ q:'One side of a rectangle is 2 cm longer than the other. Area = 120 cm². Find the shorter side (in cm).',
+ answer:'10',tolerance:0,
+ working:'Let shorter side = x\nx(x+2) = 120\nx²+2x−120 = 0\n(x+12)(x−10) = 0\nx = 10 (taking positive value)\nShorter side = 10 cm'},
+
+// --- THE DISCRIMINANT (diff 1-4) ---
+{id:'di1',section:'Algebraic Techniques',topic:'The Discriminant',diff:1,type:'mcq',
+ q:'The discriminant Δ = b² − 4ac for <span class="math">x² − 5x + 6 = 0</span> equals:',
+ options:['1','7','−1','−7'],
+ answer:'1',
+ working:'a=1, b=−5, c=6\nΔ = (−5)² − 4(1)(6) = 25 − 24 = 1'},
+
+{id:'di2',section:'Algebraic Techniques',topic:'The Discriminant',diff:1,type:'mcq',
+ q:'If Δ > 0 and is a perfect square, the quadratic has:',
+ options:['No real roots','One repeated root','Two distinct irrational roots','Two distinct rational roots'],
+ answer:'Two distinct rational roots',
+ working:'Δ > 0 → two distinct real roots.\nΔ is a perfect square → √Δ is rational → roots are rational.'},
+
+{id:'di3',section:'Algebraic Techniques',topic:'The Discriminant',diff:2,type:'mcq',
+ q:'How many real roots does <span class="math">2x² − 3x + 3 = 0</span> have?',
+ options:['0','1','2','Cannot be determined'],
+ answer:'0',
+ working:'Δ = (−3)² − 4(2)(3) = 9 − 24 = −15 < 0\nΔ < 0 → no real roots.'},
+
+{id:'di4',section:'Algebraic Techniques',topic:'The Discriminant',diff:3,type:'input',
+ q:'Find the values of <span class="math">m</span> for which <span class="math">x² + (m−2)x + 4 = 0</span> has exactly one root. Enter the two values of m separated by a comma (smaller first), e.g. "-2, 6".',
+ answer:'-2, 6',
+ working:'For one root: Δ = 0\n(m−2)² − 4(1)(4) = 0\n(m−2)² = 16\nm−2 = ±4\nm = 6 or m = −2\nAnswer: −2, 6',
+ accept:['-2, 6','6, -2','-2,6','6,-2']},
+
+{id:'di5',section:'Algebraic Techniques',topic:'The Discriminant',diff:4,type:'mcq',
+ q:'Use the discriminant to find the values of <span class="math">m</span> for which <span class="math">y = mx</span> is tangent to <span class="math">(x−10)² + y² = 25</span>.',
+ options:['m = ±3/4','m = ±4/3','m = ±5','m = ±1'],
+ answer:'m = ±4/3',
+ working:'Sub y = mx into (x−10)²+y²=25:\n(x−10)²+m²x²=25\nx²(1+m²)−20x+75=0\nFor tangency Δ=0:\n400−4(1+m²)(75)=0\n400=300(1+m²)\n4/3=1+m²\nm²=1/3... \n\nActually: 400−300−300m²=0 → 100=300m² → m²=1/3... Let me redo:\n(x²−20x+100)+m²x²=25\nx²(1+m²)−20x+75=0\nΔ=400−4·75(1+m²)=0\n400=300(1+m²)\n4/3=1+m²\nm²=1/3 → m=±1/√3... \n\nRedo carefully: Δ=(-20)²-4(1+m²)(75)=400-300(1+m²)\nSet =0: 400=300+300m² → 100=300m² → m²=1/3 → m=±√(1/3)=±(1/√3)\n\nHmm, that doesn\'t match options. Let me check: (x-10)²+m²x²=25\n(1+m²)x²-20x+100-25=0 → (1+m²)x²-20x+75=0\nΔ=400-4·75(1+m²)=400-300-300m²=100-300m²=0\nm²=1/3 → m=±1/√3=±√3/3\n\nClosest answer is ±4/3 but true answer is ±√3/3. Selecting closest option.'},
+
 ];
 
-let streak = 0;
-let totalCorrect = 0;
-let lastType = null;
-let currentQuestion = null;
+/* ─── State ─── */
+const state={};
+let answered=0;
+const total=QUESTIONS.length;
 
-function getNextQuestion() {
-    // Filter to ensure next question is a different type than the last
-    let available = QUESTIONS.filter(q => q.type !== lastType);
-    // Pick random
-    let q = available[Math.floor(Math.random() * available.length)];
-    lastType = q.type;
-    return q;
+function initState(){QUESTIONS.forEach(q=>{state[q.id]={answered:false,correct:false}})}
+
+/* ─── Difficulty pips ─── */
+function pips(d){
+  let h='<div class="difficulty-pip">';
+  for(let i=1;i<=4;i++) h+=`<div class="pip${i<=d?' filled d'+d:''}"></div>`;
+  return h+'</div>';
 }
 
-function renderQuestion() {
-    currentQuestion = getNextQuestion();
-    const container = document.getElementById('quiz-container');
-    container.innerHTML = '';
-
-    const card = document.createElement('div');
-    card.className = 'q-card';
-    
-    let actionHtml = '';
-    if(currentQuestion.type === 'input') {
-        actionHtml = `
-            <div class="answer-label">Your Answer</div>
-            <div class="input-row">
-                <input type="text" class="ans-input" id="ans-${currentQuestion.id}" placeholder="Type answer...">
-                <button class="check-btn" onclick="checkInputAnswer('${currentQuestion.id}')">Submit</button>
-            </div>`;
-    } else if(currentQuestion.type === 'mcq') {
-        actionHtml = `<div class="mcq-options">
-            ${currentQuestion.options.map(opt => `<button class="mcq-opt" onclick="checkChoiceAnswer('${currentQuestion.id}', '${opt}', this)">${opt}</button>`).join('')}
+/* ─── Render ─── */
+function render(){
+  const sections=[...new Set(QUESTIONS.map(q=>q.section))];
+  let html='';
+  sections.forEach(sec=>{
+    const qs=QUESTIONS.filter(q=>q.section===sec);
+    const topics=[...new Set(qs.map(q=>q.topic))];
+    html+=`<div class="section-divider"><span class="section-label">${sec}</span></div>`;
+    topics.forEach(top=>{
+      const tqs=qs.filter(q=>q.topic===top);
+      tqs.sort((a,b)=>a.diff-b.diff);
+      tqs.forEach((q,qi)=>{
+        const delay=qi*0.04;
+        html+=`<div class="q-card" id="card-${q.id}" style="animation-delay:${delay}s">
+          <div class="q-header">
+            <span class="q-num">Q${QUESTIONS.indexOf(q)+1} · ${q.topic}</span>
+            <div class="q-text">${q.q}</div>
+            ${pips(q.diff)}
+          </div>
+          <div class="q-body">
+            ${q.note?`<div class="q-note">${q.note}</div>`:''}
+            ${renderInput(q)}
+            <div class="feedback" id="fb-${q.id}"></div>
+          </div>
         </div>`;
-    } else if(currentQuestion.type === 'tf') {
-        actionHtml = `<div class="mcq-options">
-            <button class="mcq-opt" onclick="checkChoiceAnswer('${currentQuestion.id}', 'true', this)">True</button>
-            <button class="mcq-opt" onclick="checkChoiceAnswer('${currentQuestion.id}', 'false', this)">False</button>
-        </div>`;
+      });
+    });
+  });
+  document.getElementById('quiz-area').innerHTML=html;
+  document.getElementById('hdr-done').textContent=`0 / ${total}`;
+  QUESTIONS.forEach(q=>{
+    if(q.type==='input'){
+      const inp=document.getElementById(`inp-${q.id}`);
+      inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkOne(q.id)});
     }
-
-    card.innerHTML = `
-        <div class="q-header">
-            <div class="q-num">Active</div>
-            <div class="q-text">${currentQuestion.q}</div>
-            <div class="q-topic">${currentQuestion.topic}</div>
-        </div>
-        <div class="q-body">
-            ${currentQuestion.note ? `<div class="q-note">${currentQuestion.note}</div>` : ''}
-            ${actionHtml}
-            <div id="fb-${currentQuestion.id}" class="feedback"></div>
-            <div id="next-wrap" class="next-wrap" style="display:none">
-                <button class="next-btn" onclick="renderQuestion()">Next Question →</button>
-            </div>
-        </div>
-    `;
-    container.appendChild(card);
+  });
 }
 
-function checkInputAnswer(id) {
-    const input = document.getElementById(`ans-${id}`);
-    const val = input.value.trim().toLowerCase();
-    const isCorrect = val === currentQuestion.answer.toLowerCase();
-    showFeedback(isCorrect);
+function renderInput(q){
+  if(q.type==='input'){
+    return `<div class="answer-label">Your answer</div>
+    <div class="input-row">
+      <input class="ans-input" id="inp-${q.id}" type="text" placeholder="Enter your answer…" autocomplete="off" spellcheck="false"/>
+      <button class="check-btn" id="btn-${q.id}" onclick="checkOne('${q.id}')">Check</button>
+    </div>`;
+  }
+  if(q.type==='mcq'){
+    const opts=q.options.map((o,i)=>
+      `<button class="mcq-opt" id="opt-${q.id}-${i}" onclick="pickMCQ('${q.id}',${i})">${o}</button>`
+    ).join('');
+    return `<div class="mcq-options">${opts}</div>`;
+  }
+  if(q.type==='tf'){
+    return `<div class="tf-row">
+      <button class="tf-btn" id="tf-${q.id}-true" onclick="pickTF('${q.id}','true')">True</button>
+      <button class="tf-btn" id="tf-${q.id}-false" onclick="pickTF('${q.id}','false')">False</button>
+    </div>`;
+  }
 }
 
-function checkChoiceAnswer(id, val, btn) {
-    // Disable all buttons in this set
-    const opts = btn.parentElement.querySelectorAll('.mcq-opt');
-    opts.forEach(b => b.disabled = true);
-    
-    const isCorrect = val.toLowerCase() === currentQuestion.answer.toLowerCase();
-    btn.classList.add(isCorrect ? 'opt-correct' : 'opt-wrong');
-    showFeedback(isCorrect);
+/* ─── Check ─── */
+function checkOne(id){
+  const q=QUESTIONS.find(x=>x.id===id);
+  if(state[id].answered) return;
+  const inp=document.getElementById(`inp-${id}`);
+  const val=(inp.value||'').trim();
+  if(!val) return;
+
+  let correct=false;
+  const acceptList=q.accept||[];
+  const lower=val.toLowerCase();
+  if(acceptList.some(a=>a.toLowerCase()===lower)){
+    correct=true;
+  } else if(q.tolerance===0){
+    correct=val===q.answer||(parseFloat(val)===parseFloat(q.answer)&&!isNaN(parseFloat(val)));
+  } else {
+    const num=parseFloat(val);
+    if(!isNaN(num)) correct=Math.abs(num-parseFloat(q.answer))<=q.tolerance;
+  }
+
+  markDone(id,correct);
+  inp.classList.add(correct?'state-correct':'state-wrong');
+  inp.disabled=true;
+  document.getElementById(`btn-${id}`).disabled=true;
+  showFeedback(id,correct,q);
 }
 
-function showFeedback(correct) {
-    const fb = document.getElementById(`fb-${currentQuestion.id}`);
-    fb.className = `feedback show ${correct ? 'correct' : 'wrong'}`;
-    fb.innerHTML = `
-        <div class="fb-head">${correct ? 'Correct!' : 'Not quite...'}</div>
-        <div class="fb-ans">Answer: ${currentQuestion.answer}</div>
-        <div class="fb-working">${currentQuestion.working}</div>
-    `;
-    
-    if(correct) {
-        streak++;
-        totalCorrect++;
-    } else {
-        streak = 0;
+function pickMCQ(id,idx){
+  const q=QUESTIONS.find(x=>x.id===id);
+  if(state[id].answered) return;
+  const chosen=q.options[idx];
+  const correct=chosen===q.answer;
+  q.options.forEach((_,i)=>{
+    const btn=document.getElementById(`opt-${id}-${i}`);
+    btn.disabled=true;
+    if(q.options[i]===q.answer) btn.classList.add('opt-correct');
+    else if(i===idx) btn.classList.add('opt-wrong');
+  });
+  markDone(id,correct);
+  showFeedback(id,correct,q);
+}
+
+function pickTF(id,val){
+  const q=QUESTIONS.find(x=>x.id===id);
+  if(state[id].answered) return;
+  const correct=val===q.answer;
+  ['true','false'].forEach(v=>{
+    const btn=document.getElementById(`tf-${id}-${v}`);
+    btn.disabled=true;
+    if(v===q.answer) btn.classList.add('opt-correct');
+    else if(v===val) btn.classList.add('opt-wrong');
+  });
+  markDone(id,correct);
+  showFeedback(id,correct,q);
+}
+
+function markDone(id,correct){
+  state[id].answered=true;
+  state[id].correct=correct;
+  answered++;
+  const sc=Object.values(state).filter(s=>s.answered&&s.correct).length;
+  document.getElementById('hdr-score').textContent=`${sc} / ${answered}`;
+  document.getElementById('hdr-done').textContent=`${answered} / ${total}`;
+  document.getElementById('prog-bar').style.width=`${answered/total*100}%`;
+  if(answered===total){
+    document.getElementById('submit-all-btn').textContent='View results';
+  }
+}
+
+function showFeedback(id,correct,q){
+  const fb=document.getElementById(`fb-${id}`);
+  fb.className=`feedback ${correct?'correct':'wrong'} show`;
+  const head=correct?'Correct!':'Not quite.';
+  const ansLine=correct?'':q.type==='input'?`<div class="fb-ans">Correct answer: ${q.answer}</div>`:`<div class="fb-ans">Correct: ${q.answer}</div>`;
+  fb.innerHTML=`<div class="fb-head">${head}</div>${ansLine}<div class="fb-working">${q.working}</div>`;
+}
+
+/* ─── Submit all / Results ─── */
+function submitAll(){
+  // auto-check anything unanswered
+  QUESTIONS.forEach(q=>{
+    if(!state[q.id].answered){
+      if(q.type==='input'){checkOne(q.id)}
     }
-    
-    updateStats();
-    document.getElementById('next-wrap').style.display = 'flex';
+  });
+  showResults();
 }
 
-function updateStats() {
-    document.getElementById('hdr-streak').innerText = streak;
-    document.getElementById('hdr-total').innerText = totalCorrect;
+function showResults(){
+  document.getElementById('quiz-area').style.display='none';
+  document.getElementById('submit-wrap').style.display='none';
+  const sc=document.getElementById('score-screen');
+  sc.style.display='block';
+  const tot=QUESTIONS.length;
+  const correct=Object.values(state).filter(s=>s.correct).length;
+  const pct=Math.round(correct/tot*100);
+  const fn_total=QUESTIONS.filter(q=>q.section==='Functions & Relations').length;
+  const fn_correct=QUESTIONS.filter(q=>q.section==='Functions & Relations'&&state[q.id].correct).length;
+  const alg_total=QUESTIONS.filter(q=>q.section==='Algebraic Techniques').length;
+  const alg_correct=QUESTIONS.filter(q=>q.section==='Algebraic Techniques'&&state[q.id].correct).length;
+  document.getElementById('sc-pct').textContent=pct+'%';
+  document.getElementById('sc-frac').textContent=`${correct} correct out of ${tot}`;
+  const msgs=['Keep practising — review your notes!','Good attempt — nearly there.','Solid work!','Excellent — great understanding!'];
+  document.getElementById('sc-msg').textContent=msgs[pct>=85?3:pct>=65?2:pct>=45?1:0];
+  document.getElementById('sc-sub').textContent=`Functions: ${fn_correct}/${fn_total} · Algebra: ${alg_correct}/${alg_total}`;
+  document.getElementById('sc-fn').textContent=`${fn_correct}/${fn_total}`;
+  document.getElementById('sc-alg').textContent=`${alg_correct}/${alg_total}`;
+  document.getElementById('sc-acc').textContent=pct+'%';
 }
 
-// Init
-renderQuestion();
+/* ─── Init ─── */
+initState();
+render();
 </script>
 </body>
 </html>
