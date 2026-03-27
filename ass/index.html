@@ -711,11 +711,12 @@
    CONFIG — fill these in before deploying
    ═══════════════════════════════════════════════════════════════ */
 const CONFIG = {
-  owner:  "YOUR_GITHUB_USERNAME",
-  repo:   "YOUR_REPO_NAME",
+  owner:  "mclarenproductions1-afk",
+  repo:   "RyansSITE",
   branch: "main",
-  token:  "YOUR_PERSONAL_ACCESS_TOKEN"
+  token:  "YOUR_PERSONAL_ACCESS_TOKEN"   // ← paste your token here
 };
+
 
 /* ═══════════════════════════════════════════════════════════════
    State
@@ -725,7 +726,7 @@ let fileSHA  = null;          // latest SHA of tasks.json, needed to push update
 let filter   = "all";
 let editId   = null;
 let taskType = "assignment";
-const FILE_PATH = "tasks.json";
+const FILE_PATH = "/ass/tasks.json";
 
 /* ═══════════════════════════════════════════════════════════════
    GitHub API helpers
