@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2D Vectors — Physics Quiz</title>
+<title>Study Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -18,18 +18,6 @@
     --muted: #7a7268;
     --accent: #c8440a;
     --accent-light: #fdf0ea;
-    --accent-border: #e8a882;
-    --correct: #1a6b3a;
-    --correct-bg: #edf7f2;
-    --correct-border: #7ecfa0;
-    --wrong: #8b1a1a;
-    --wrong-bg: #fdf0f0;
-    --wrong-border: #e8a0a0;
-    --tag-boat: #0a4a6b; --tag-boat-bg: #e8f4fb;
-    --tag-proj: #2d6b0a; --tag-proj-bg: #f0f7ea;
-    --tag-rel:  #6b4e0a; --tag-rel-bg:  #faf4e8;
-    --tag-comp: #4a0a6b; --tag-comp-bg: #f4e8fb;
-    --tag-add:  #0a2d6b; --tag-add-bg:  #e8eefb;
   }
 
   html { font-size: 16px; }
@@ -43,7 +31,6 @@
     flex-direction: column;
   }
 
-  /* grain overlay */
   body::before {
     content: '';
     position: fixed;
@@ -54,15 +41,12 @@
     z-index: 0;
   }
 
-  /* ─── Header ─── */
   header {
     position: relative; z-index: 1;
     padding: 28px 40px 20px;
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
     border-bottom: 1px solid var(--border);
   }
+
   .logo {
     font-family: 'Instrument Serif', serif;
     font-size: 22px;
@@ -70,643 +54,172 @@
     letter-spacing: -0.3px;
   }
   .logo em { font-style: italic; color: var(--accent); }
-  .header-stats {
-    display: flex;
-    gap: 28px;
+
+  .tagline {
     font-size: 13px;
     color: var(--muted);
+    margin-top: 4px;
+    font-family: 'IBM Plex Mono', monospace;
   }
-  .header-stats span { color: var(--text); font-weight: 500; }
 
-  /* ─── Main layout ─── */
   main {
     position: relative; z-index: 1;
     flex: 1;
-    display: grid;
-    place-items: start center;
-    padding: 48px 24px 80px;
+    padding: 56px 40px 80px;
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
   }
 
-  .card-wrap {
-    width: 100%;
-    max-width: 660px;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    animation: rise 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
   }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .app-card {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 28px 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    animation: rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .app-card:nth-child(2) { animation-delay: 0.06s; }
+  .app-card:nth-child(3) { animation-delay: 0.12s; }
 
   @keyframes rise {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ─── Progress ─── */
-  .progress-track {
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    margin-bottom: 28px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  .app-card:hover {
+    border-color: var(--border-strong);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
   }
 
-  /* ─── Question card ─── */
-  .q-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  .card-icon {
+    font-size: 28px;
+    margin-bottom: 16px;
+    display: block;
   }
 
-  .q-top {
-    padding: 28px 32px 24px;
-    border-bottom: 1px solid var(--border);
+  .card-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    letter-spacing: -0.2px;
+    margin-bottom: 6px;
+    color: var(--text);
   }
 
-  .q-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
+  .card-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
   }
 
-  .tag {
+  .card-link {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.5px;
-    padding: 4px 10px;
-    border-radius: 99px;
-    border: 1px solid;
-    text-transform: uppercase;
-  }
-  .tag-boat { color: var(--tag-boat); background: var(--tag-boat-bg); border-color: #a8d0e8; }
-  .tag-proj { color: var(--tag-proj); background: var(--tag-proj-bg); border-color: #a8d8a8; }
-  .tag-rel  { color: var(--tag-rel);  background: var(--tag-rel-bg);  border-color: #e8c888; }
-  .tag-comp { color: var(--tag-comp); background: var(--tag-comp-bg); border-color: #c8a8e8; }
-  .tag-add  { color: var(--tag-add);  background: var(--tag-add-bg);  border-color: #a8b8e8; }
-
-  .q-num {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .q-text {
-    font-family: 'Instrument Serif', serif;
-    font-size: 22px;
-    line-height: 1.55;
-    color: var(--text);
-    letter-spacing: -0.2px;
-  }
-
-  /* ─── Given panel ─── */
-  .given-panel {
-    padding: 18px 32px;
-    background: #faf9f6;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 24px;
-  }
-  .given-item {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  .given-item strong { color: var(--text); font-weight: 500; }
-
-  /* ─── Answer section ─── */
-  .answer-section {
-    padding: 24px 32px 28px;
-  }
-
-  .answer-label {
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-    font-family: 'IBM Plex Mono', monospace;
-  }
-
-  .input-row {
-    display: flex;
-    gap: 10px;
-    align-items: stretch;
-  }
-
-  .answer-input {
-    flex: 1;
-    height: 50px;
-    padding: 0 16px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 16px;
-    color: var(--text);
-    background: var(--bg);
-    border: 1.5px solid var(--border-strong);
-    border-radius: 10px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .answer-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(200,68,10,0.12);
-  }
-  .answer-input.correct-input {
-    border-color: var(--correct-border);
-    background: var(--correct-bg);
-    color: var(--correct);
-  }
-  .answer-input.wrong-input {
-    border-color: var(--wrong-border);
-    background: var(--wrong-bg);
-    color: var(--wrong);
-  }
-
-  .hint-text {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 7px;
-    font-family: 'IBM Plex Mono', monospace;
-  }
-
-  .submit-btn {
-    height: 50px;
-    padding: 0 24px;
-    background: var(--text);
-    color: #fff;
-    font-family: 'Instrument Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-    white-space: nowrap;
-  }
-  .submit-btn:hover { background: var(--accent); }
-  .submit-btn:active { transform: scale(0.97); }
-  .submit-btn:disabled { opacity: 0.4; cursor: default; background: var(--text); }
-
-  /* ─── Feedback card ─── */
-  .feedback-card {
-    margin-top: 12px;
-    border-radius: 12px;
-    padding: 18px 20px;
-    font-size: 14px;
-    line-height: 1.65;
-    display: none;
-    animation: fadeIn 0.25s ease;
-  }
-  .feedback-card.show { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-  .feedback-card.correct {
-    background: var(--correct-bg);
-    border: 1px solid var(--correct-border);
-    color: var(--correct);
-  }
-  .feedback-card.wrong {
-    background: var(--wrong-bg);
-    border: 1px solid var(--wrong-border);
-    color: var(--wrong);
-  }
-
-  .feedback-headline {
-    font-family: 'Instrument Serif', serif;
-    font-size: 18px;
-    margin-bottom: 6px;
-  }
-  .feedback-explain {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12.5px;
-    line-height: 1.8;
-    opacity: 0.85;
-    white-space: pre-wrap;
-  }
-  .feedback-ans {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    margin-top: 8px;
-    font-weight: 500;
-  }
-
-  /* ─── Action row ─── */
-  .action-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
-  }
-
-  .next-btn {
-    height: 46px;
-    padding: 0 28px;
-    background: var(--accent);
-    color: #fff;
-    font-family: 'Instrument Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .next-btn:hover { opacity: 0.88; }
-  .next-btn:active { transform: scale(0.97); }
-  .next-btn:disabled { opacity: 0.3; cursor: default; }
-  .next-btn svg { width: 16px; height: 16px; }
-
-  .skip-btn {
-    font-size: 13px;
-    color: var(--muted);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: 'Instrument Sans', sans-serif;
-    padding: 8px 4px;
-    transition: color 0.15s;
-  }
-  .skip-btn:hover { color: var(--text); }
-
-  /* ─── Results ─── */
-  .result-wrap {
-    text-align: center;
-    padding: 60px 40px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-  }
-  .result-big {
-    font-family: 'Instrument Serif', serif;
-    font-size: 80px;
-    line-height: 1;
     color: var(--accent);
-    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
   }
-  .result-label { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
-  .result-msg {
-    font-family: 'Instrument Serif', serif;
-    font-size: 26px;
-    margin-bottom: 28px;
-    color: var(--text);
-  }
-  .restart-btn {
-    padding: 12px 32px;
-    background: var(--text);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-family: 'Instrument Sans', sans-serif;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .restart-btn:hover { background: var(--accent); }
 
-  /* ─── Responsive ─── */
+  .card-link svg {
+    transition: transform 0.15s;
+  }
+  .app-card:hover .card-link svg {
+    transform: translateX(3px);
+  }
+
+  footer {
+    position: relative; z-index: 1;
+    padding: 20px 40px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
   @media (max-width: 600px) {
     header { padding: 20px 20px 16px; }
-    .header-stats { gap: 16px; }
-    .q-top, .answer-section { padding-left: 20px; padding-right: 20px; }
-    .given-panel { padding-left: 20px; padding-right: 20px; }
-    .q-text { font-size: 19px; }
-    main { padding: 28px 16px 60px; }
+    main { padding: 36px 20px 60px; }
+    footer { padding: 16px 20px; }
+    .grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">2 <em>Vectors</em> — Physics</div>
-  <div class="header-stats">
-    <div>Questions <span id="hdr-count">0</span></div>
-    <div>Correct <span id="hdr-score">0</span></div>
-    <div>Accuracy <span id="hdr-pct">—</span></div>
-  </div>
+  <div class="logo">Study <em>Hub</em></div>
+  <div class="tagline">pick a tool and get to work</div>
 </header>
 
 <main>
-  <div class="card-wrap" id="app"></div>
+  <div class="section-label">Apps</div>
+  <div class="grid">
+
+    <a class="app-card" href="/ass">
+      <span class="card-icon">📚</span>
+      <div class="card-title">StudyDesk</div>
+      <div class="card-desc">Track assignments and upcoming tests. Mark tasks complete, filter by status, synced via GitHub.</div>
+      <span class="card-link">
+        Open
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+    <a class="app-card" href="/physics">
+      <span class="card-icon">⚡</span>
+      <div class="card-title">2D Vectors</div>
+      <div class="card-desc">Physics quiz covering components, resultants, river crossings, relative velocity, and more.</div>
+      <span class="card-link">
+        Open
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+    <a class="app-card" href="/maths">
+      <span class="card-icon">📐</span>
+      <div class="card-title">Maths Advanced</div>
+      <div class="card-desc">Year 11 advanced maths practice test with worked solutions and instant feedback.</div>
+      <span class="card-link">
+        Open
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+  </div>
 </main>
 
-<script>
-const r = (n, dp=2) => parseFloat(n.toFixed(dp));
-const deg = d => d * Math.PI / 180;
+<footer>bigballzlord.online</footer>
 
-let qIdx = 0, score = 0, total = 0;
-let problems = [];
-let answered = false;
-
-/* ── problem generators ── */
-function genProblem() {
-  const type = Math.floor(Math.random() * 6);
-
-  if (type === 0) {
-    const v = r(Math.random()*12+3, 1);
-    const theta = Math.floor(Math.random()*55+15);
-    const askX = Math.random() < 0.5;
-    const ans = askX ? r(v*Math.cos(deg(theta)),2) : r(v*Math.sin(deg(theta)),2);
-    const comp = askX ? 'horizontal' : 'vertical';
-    const formula = askX ? 'vₓ = v·cos θ' : 'vᵧ = v·sin θ';
-    return {
-      tag: 'tag-comp', tagLabel: 'Component resolution',
-      q: `A soccer ball is kicked at ${v} m/s at an angle of ${theta}° above the horizontal. Find the ${comp} component of its initial velocity.`,
-      given: [['Speed (v)', `${v} m/s`], ['Angle (θ)', `${theta}°`], ['Formula', formula]],
-      answer: ans,
-      unit: 'm/s',
-      tolerance: 0.1,
-      explain: `${formula}\n= ${v} × ${askX?'cos':'sin'}(${theta}°)\n= ${ans} m/s`
-    };
-  }
-
-  if (type === 1) {
-    const vx = r(Math.random()*12+2, 1);
-    const vy = r(Math.random()*12+2, 1);
-    const mag = r(Math.sqrt(vx*vx+vy*vy), 2);
-    const theta = r(Math.atan2(vy,vx)*180/Math.PI, 1);
-    const askMag = Math.random() < 0.5;
-    return {
-      tag: 'tag-add', tagLabel: 'Vector resultant',
-      q: askMag
-        ? `An object moves with a horizontal velocity of ${vx} m/s and a vertical velocity of ${vy} m/s. What is the magnitude of its resultant velocity?`
-        : `An object has a horizontal velocity of ${vx} m/s and a vertical velocity of ${vy} m/s. At what angle above the horizontal is the resultant velocity directed?`,
-      given: [['vₓ', `${vx} m/s`], ['vᵧ', `${vy} m/s`], askMag ? ['Formula', '|v| = √(vₓ²+vᵧ²)'] : ['Formula', 'θ = arctan(vᵧ/vₓ)']],
-      answer: askMag ? mag : theta,
-      unit: askMag ? 'm/s' : '°',
-      tolerance: 0.15,
-      explain: askMag
-        ? `|v| = √(${vx}² + ${vy}²)\n= √(${r(vx*vx,2)} + ${r(vy*vy,2)})\n= √${r(vx*vx+vy*vy,2)}\n= ${mag} m/s`
-        : `θ = arctan(${vy} / ${vx})\n= arctan(${r(vy/vx,3)})\n= ${theta}°`
-    };
-  }
-
-  if (type === 2) {
-    const vb = r(Math.random()*4+1.5, 1);
-    const vr = r(Math.random()*2.5+0.5, 1);
-    const width = Math.floor(Math.random()*120+40);
-    const t = r(width/vb, 2);
-    const drift = r(vr*t, 2);
-    const actual = r(Math.sqrt(vb*vb+vr*vr), 2);
-    const pick = Math.random();
-    if (pick < 0.4) {
-      return {
-        tag: 'tag-boat', tagLabel: 'River crossing',
-        q: `A boat travels at ${vb} m/s perpendicular to the bank of a river ${width} m wide. The river current flows at ${vr} m/s parallel to the bank. How far downstream does the boat land on the other side?`,
-        given: [['Boat speed (⊥)', `${vb} m/s`], ['Current speed (∥)', `${vr} m/s`], ['River width', `${width} m`]],
-        answer: drift, unit: 'm', tolerance: 0.2,
-        explain: `Time to cross:\nt = width / v_boat = ${width} / ${vb} = ${t} s\n\nDownstream drift:\nd = v_river × t = ${vr} × ${t} = ${drift} m`
-      };
-    } else if (pick < 0.7) {
-      return {
-        tag: 'tag-boat', tagLabel: 'River crossing',
-        q: `A boat crosses a ${width} m wide river at ${vb} m/s perpendicular to the current. The river flows at ${vr} m/s. How long does it take to cross?`,
-        given: [['Boat speed (⊥)', `${vb} m/s`], ['River width', `${width} m`]],
-        answer: t, unit: 's', tolerance: 0.1,
-        explain: `t = width / v_boat\n= ${width} / ${vb}\n= ${t} s`
-      };
-    } else {
-      return {
-        tag: 'tag-boat', tagLabel: 'River crossing',
-        q: `A boat moves at ${vb} m/s perpendicular to a river, while the current pushes it at ${vr} m/s downstream. What is the boat's actual speed relative to the ground?`,
-        given: [['Boat speed (⊥)', `${vb} m/s`], ['Current speed (∥)', `${vr} m/s`], ['Formula', '|v| = √(v_b²+v_r²)']],
-        answer: actual, unit: 'm/s', tolerance: 0.1,
-        explain: `v_actual = √(v_boat² + v_river²)\n= √(${vb}² + ${vr}²)\n= √${r(vb*vb+vr*vr,2)}\n= ${actual} m/s`
-      };
-    }
-  }
-
-  if (type === 3) {
-    const va = r(Math.random()*20+10, 1);
-    const vb = r(Math.random()*15+5, 1);
-    const sameDir = Math.random() < 0.5;
-    const vrel = sameDir ? r(Math.abs(va-vb), 2) : r(va+vb, 2);
-    return {
-      tag: 'tag-rel', tagLabel: 'Relative velocity',
-      q: sameDir
-        ? `Car A travels north at ${va} m/s. Car B travels north at ${vb} m/s on the same road. What is the speed of Car A as observed by a passenger in Car B?`
-        : `Train A moves east at ${va} m/s. Train B moves west at ${vb} m/s on a parallel track. What is the speed of Train A relative to Train B?`,
-      given: [['v_A', `${va} m/s`], ['v_B', `${vb} m/s`], ['Formula', 'v_A/B = v_A − v_B (vectors)']],
-      answer: vrel, unit: 'm/s', tolerance: 0.1,
-      explain: sameDir
-        ? `Same direction → subtract speeds:\nv_A/B = ${va} − ${vb} = ${vrel} m/s`
-        : `Opposite directions → add speeds:\nv_A/B = ${va} + ${vb} = ${vrel} m/s\n(taking east as +ve: v_B = −${vb})\nv_A/B = ${va} − (−${vb}) = ${vrel} m/s`
-    };
-  }
-
-  if (type === 4) {
-    const speed = r(Math.random()*200+80, 0);
-    const wind = r(Math.random()*50+10, 0);
-    const crosswind = Math.random() < 0.55;
-    if (crosswind) {
-      const actual = r(Math.sqrt(speed*speed+wind*wind), 1);
-      const theta = r(Math.atan2(wind,speed)*180/Math.PI, 1);
-      const askMag = Math.random() < 0.5;
-      return {
-        tag: 'tag-rel', tagLabel: 'Aeroplane crosswind',
-        q: askMag
-          ? `An aeroplane heads due north at ${speed} km/h. A crosswind blows due east at ${wind} km/h. What is the plane's actual ground speed?`
-          : `An aeroplane heads north at ${speed} km/h while a crosswind blows east at ${wind} km/h. What angle east of north is the plane's actual path over the ground?`,
-        given: [['Heading speed (N)', `${speed} km/h`], ['Crosswind (E)', `${wind} km/h`]],
-        answer: askMag ? actual : theta,
-        unit: askMag ? 'km/h' : '°',
-        tolerance: askMag ? 0.5 : 0.2,
-        explain: askMag
-          ? `Ground speed = √(v_plane² + v_wind²)\n= √(${speed}² + ${wind}²)\n= √${speed*speed+wind*wind}\n= ${actual} km/h`
-          : `θ = arctan(v_wind / v_plane)\n= arctan(${wind} / ${speed})\n= ${theta}° east of north`
-      };
-    } else {
-      const tailwind = Math.random() < 0.5;
-      const gs = tailwind ? r(speed+wind, 0) : r(speed-wind, 0);
-      return {
-        tag: 'tag-rel', tagLabel: tailwind ? 'Tailwind' : 'Headwind',
-        q: tailwind
-          ? `A plane flies east at an airspeed of ${speed} km/h. A tailwind of ${wind} km/h blows from the west (i.e., also eastward). What is the plane's ground speed?`
-          : `A plane flies east at an airspeed of ${speed} km/h into a headwind of ${wind} km/h blowing from the east. What is the plane's ground speed?`,
-        given: [['Airspeed', `${speed} km/h`], [tailwind?'Tailwind':'Headwind', `${wind} km/h`]],
-        answer: gs, unit: 'km/h', tolerance: 0.5,
-        explain: tailwind
-          ? `Tailwind adds to ground speed:\nGS = ${speed} + ${wind} = ${gs} km/h`
-          : `Headwind reduces ground speed:\nGS = ${speed} − ${wind} = ${gs} km/h`
-      };
-    }
-  }
-
-  // Vector addition of two forces
-  const ax = r(Math.random()*15+2, 1);
-  const ay = r(Math.random()*15+2, 1);
-  const bx = r(Math.random()*15+2, 1);
-  const by = r(Math.random()*15+2, 1);
-  const rx = r(ax+bx, 2);
-  const ry = r(ay+by, 2);
-  const mag = r(Math.sqrt(rx*rx+ry*ry), 2);
-  const theta = r(Math.atan2(ry,rx)*180/Math.PI, 1);
-  const askMag = Math.random() < 0.6;
-  return {
-    tag: 'tag-add', tagLabel: 'Vector addition',
-    q: askMag
-      ? `Two displacement vectors act on a rover. Vector A = (${ax} m east, ${ay} m north). Vector B = (${bx} m east, ${by} m north). What is the magnitude of the resultant displacement?`
-      : `Two displacement vectors act on a rover. Vector A = (${ax} m east, ${ay} m north). Vector B = (${bx} m east, ${by} m north). What angle north of east does the resultant point?`,
-    given: [['A', `(${ax}, ${ay}) m`], ['B', `(${bx}, ${by}) m`], ['Method', 'add components, then √']],
-    answer: askMag ? mag : theta,
-    unit: askMag ? 'm' : '°',
-    tolerance: 0.2,
-    explain: `Rₓ = ${ax} + ${bx} = ${rx} m\nRᵧ = ${ay} + ${by} = ${ry} m\n\n${askMag
-      ? `|R| = √(${rx}² + ${ry}²)\n= √${r(rx*rx+ry*ry,2)}\n= ${mag} m`
-      : `θ = arctan(${ry} / ${rx})\n= arctan(${r(ry/rx,3)})\n= ${theta}°`}`
-  };
-}
-
-function buildPool(n) {
-  return Array.from({length: n}, genProblem);
-}
-
-/* ── check answer ── */
-function checkAnswer(userStr, problem) {
-  const num = parseFloat(userStr.replace(/[^\d.\-]/g, ''));
-  if (isNaN(num)) return null;
-  return Math.abs(num - problem.answer) <= problem.tolerance;
-}
-
-/* ── render ── */
-function updateHeader() {
-  document.getElementById('hdr-count').textContent = total;
-  document.getElementById('hdr-score').textContent = score;
-  document.getElementById('hdr-pct').textContent = total > 0 ? Math.round(score/total*100)+'%' : '—';
-}
-
-function renderResult() {
-  const pct = Math.round(score/total*100);
-  const msg = pct >= 85 ? 'Excellent work.' : pct >= 65 ? 'Good effort.' : 'Keep practising.';
-  document.getElementById('app').innerHTML = `
-    <div class="result-wrap">
-      <div class="result-big">${pct}%</div>
-      <div class="result-label">${score} correct out of ${total} answered</div>
-      <div class="result-msg">${msg}</div>
-      <button class="restart-btn" onclick="restartQuiz()">Try again</button>
-    </div>`;
-}
-
-function renderProblem() {
-  if (qIdx >= problems.length) { renderResult(); return; }
-  answered = false;
-  const p = problems[qIdx];
-  const pct = qIdx / problems.length * 100;
-
-  const givenHTML = p.given.map(([k,v]) =>
-    `<div class="given-item"><strong>${k}:</strong> ${v}</div>`
-  ).join('');
-
-  document.getElementById('app').innerHTML = `
-    <div class="progress-track"><div class="progress-fill" id="pbar" style="width:${pct}%"></div></div>
-    <div class="q-card">
-      <div class="q-top">
-        <div class="q-meta">
-          <span class="tag ${p.tag}">${p.tagLabel}</span>
-          <span class="q-num">Q${qIdx+1}</span>
-        </div>
-        <div class="q-text">${p.q}</div>
-      </div>
-      <div class="given-panel">${givenHTML}</div>
-      <div class="answer-section">
-        <div class="answer-label">Your answer</div>
-        <div class="input-row">
-          <input class="answer-input" id="ans-input" type="text"
-            placeholder="Enter a number (e.g. 12.5)"
-            autocomplete="off" autocorrect="off" spellcheck="false" />
-          <button class="submit-btn" id="submit-btn" onclick="submitAnswer()">Check</button>
-        </div>
-        <div class="hint-text" id="unit-hint">Expected unit: ${p.unit} — just enter the number</div>
-        <div class="feedback-card" id="feedback"></div>
-      </div>
-    </div>
-    <div class="action-row">
-      <button class="skip-btn" onclick="skipProblem()">Skip this question</button>
-      <button class="next-btn" id="next-btn" onclick="nextProblem()" disabled>
-        Next question
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 8h10M9 4l4 4-4 4"/>
-        </svg>
-      </button>
-    </div>`;
-
-  const input = document.getElementById('ans-input');
-  input.focus();
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') submitAnswer(); });
-}
-
-window.submitAnswer = function() {
-  if (answered) return;
-  const input = document.getElementById('ans-input');
-  const val = input.value.trim();
-  if (!val) return;
-
-  const p = problems[qIdx];
-  const result = checkAnswer(val, p);
-  if (result === null) {
-    document.getElementById('unit-hint').textContent = 'Please enter a valid number.';
-    input.focus();
-    return;
-  }
-
-  answered = true;
-  total++;
-  if (result) score++;
-  updateHeader();
-
-  const fb = document.getElementById('feedback');
-  if (result) {
-    input.classList.add('correct-input');
-    fb.className = 'feedback-card correct show';
-    fb.innerHTML = `<div class="feedback-headline">Correct!</div>
-      <div class="feedback-explain">${p.explain}</div>`;
-  } else {
-    input.classList.add('wrong-input');
-    fb.className = 'feedback-card wrong show';
-    fb.innerHTML = `<div class="feedback-headline">Not quite.</div>
-      <div class="feedback-ans">Correct answer: ${p.answer} ${p.unit}</div>
-      <div class="feedback-explain">${p.explain}</div>`;
-  }
-
-  document.getElementById('submit-btn').disabled = true;
-  document.getElementById('next-btn').disabled = false;
-};
-
-window.nextProblem = function() {
-  qIdx++;
-  if (qIdx >= problems.length - 3) problems.push(...buildPool(5));
-  renderProblem();
-};
-
-window.skipProblem = function() {
-  qIdx++;
-  if (qIdx >= problems.length - 3) problems.push(...buildPool(5));
-  renderProblem();
-};
-
-window.restartQuiz = function() {
-  qIdx = 0; score = 0; total = 0;
-  problems = buildPool(20);
-  updateHeader();
-  renderProblem();
-};
-
-/* ── init ── */
-problems = buildPool(20);
-updateHeader();
-renderProblem();
-</script>
 </body>
 </html>
