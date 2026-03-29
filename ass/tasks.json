@@ -8,15 +8,5 @@
     "notes": "Design, build and test a text-based maze game using Python. Requirements: 8+ linked rooms, 5+ items with interactions, scoring system, save/load functionality, documentation, and 2-3 minute video explanation.",
     "completed": false,
     "createdAt": "2026-03-29"
-  },
-  {
-    "id": "7d746c55-ec5d-4d96-9018-84f3be59352f",
-    "title": "Week 2 (Apr 11-18): Core Development - Maze Game",
-    "subject": "Computer Science",
-    "type": "assignment",
-    "dueDate": "2026-04-18",
-    "notes": "Week 2 deliverables: Implement room dictionary structure, build basic movement commands, add 5+ items to rooms, create item interaction functions (pick up, use, trade), implement inventory as a list, test room navigation and item interactions.",
-    "completed": false,
-    "createdAt": "2026-03-29"
   }
 ]
