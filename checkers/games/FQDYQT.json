@@ -21,7 +21,10 @@
       "name": "Liam",
       "joinedAt": "2026-03-30T23:55:52.372Z"
     },
-    null
+    {
+      "name": "ryan 2",
+      "joinedAt": "2026-03-30T23:56:01.306Z"
+    }
   ],
   "board": {
     "0,300": 0,
@@ -89,5 +92,5 @@
   "turnCount": 0,
   "finishOrder": [],
   "winner": null,
-  "updatedAt": "2026-03-30T23:55:52.372Z"
+  "updatedAt": "2026-03-30T23:56:01.306Z"
 }
