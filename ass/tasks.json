@@ -8,5 +8,15 @@
     "notes": "gtrgtrer",
     "completed": false,
     "createdAt": "2026-03-30"
+  },
+  {
+    "id": "6cef477e-7e1e-4641-931e-e3e361568f01",
+    "title": "Minor Design Task",
+    "subject": "Design & Tech",
+    "type": "assignment",
+    "dueDate": "2026-03-30",
+    "notes": "40 page folio",
+    "completed": false,
+    "createdAt": "2026-03-30"
   }
 ]
