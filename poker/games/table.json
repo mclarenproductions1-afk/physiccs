@@ -1,50 +1,10 @@
 {
   "status": "waiting",
   "players": [
-    {
-      "name": "John",
-      "chips": 1000,
-      "bet": 0,
-      "hand": [],
-      "folded": false,
-      "allIn": false,
-      "inHand": false,
-      "lastAction": "",
-      "joinedAt": "2026-03-31T08:55:36.587Z"
-    },
-    {
-      "name": "cameron",
-      "chips": 1000,
-      "bet": 0,
-      "hand": [],
-      "folded": false,
-      "allIn": false,
-      "inHand": false,
-      "lastAction": "",
-      "joinedAt": "2026-03-31T23:47:29.567Z"
-    },
-    {
-      "name": "Ryan",
-      "chips": 1000,
-      "bet": 0,
-      "hand": [],
-      "folded": false,
-      "allIn": false,
-      "inHand": false,
-      "lastAction": "",
-      "joinedAt": "2026-03-31T23:47:55.999Z"
-    },
-    {
-      "name": "67",
-      "chips": 1000,
-      "bet": 0,
-      "hand": [],
-      "folded": false,
-      "allIn": false,
-      "inHand": false,
-      "lastAction": "",
-      "joinedAt": "2026-03-31T23:48:13.145Z"
-    },
+    null,
+    null,
+    null,
+    null,
     null,
     null
   ],
@@ -63,5 +23,5 @@
   "lastAggressor": -1,
   "roundStartPlayer": -1,
   "actions": [],
-  "updatedAt": "2026-03-31T23:48:13.145Z"
+  "updatedAt": "2026-03-31T23:48:19.640Z"
 }
