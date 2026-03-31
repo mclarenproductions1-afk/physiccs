@@ -17,8 +17,8 @@
     },
     {
       "name": "42",
-      "chips": 845,
-      "bet": 0,
+      "chips": 745,
+      "bet": 100,
       "hand": [
         "Qh",
         "9s"
@@ -26,7 +26,7 @@
       "folded": false,
       "allIn": false,
       "inHand": true,
-      "lastAction": "",
+      "lastAction": "Raise 100",
       "joinedAt": "2026-03-31T23:50:48.528Z"
     },
     null,
@@ -90,16 +90,22 @@
     "Jh",
     "Qs"
   ],
-  "pot": 230,
+  "pot": 330,
   "sidePots": [],
-  "currentBet": 0,
-  "minRaise": 20,
-  "currentTurn": 1,
-  "turnStartedAt": "2026-03-31T23:54:35.940Z",
+  "currentBet": 100,
+  "minRaise": 100,
+  "currentTurn": 0,
+  "turnStartedAt": "2026-03-31T23:54:56.424Z",
   "lastAggressor": 1,
   "roundStartPlayer": 0,
-  "actions": [],
-  "updatedAt": "2026-03-31T23:54:35.940Z",
+  "actions": [
+    {
+      "slot": 1,
+      "action": "raise",
+      "amount": 100
+    }
+  ],
+  "updatedAt": "2026-03-31T23:54:56.424Z",
   "lastWinners": [
     {
       "slot": 2,
