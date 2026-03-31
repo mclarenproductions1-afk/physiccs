@@ -402,8 +402,9 @@ input[type="text"]:focus { border-color: var(--text); }
       <div id="lby-slots" class="slots"></div>
       <button id="btn-start" class="btn" style="width:100%;display:none">Start Game</button>
       <p id="lby-status" style="font-size:0.78rem;color:var(--muted);margin-top:10px;text-align:center"></p>
-      <div style="margin-top:16px">
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
         <button id="btn-leave" class="btn btn-outline" style="width:100%;font-size:0.78rem">Leave Table</button>
+        <button id="btn-reset-lobby" class="btn btn-outline" style="width:100%;font-size:0.78rem;color:#c0392b;border-color:#e5c4c0;">Reset Table</button>
       </div>
     </div>
   </div>
@@ -414,7 +415,10 @@ input[type="text"]:focus { border-color: var(--text); }
   <div class="game-header">
     <a href="/poker" id="btn-exit-game" class="back-link">← Leave</a>
     <span class="game-title">Poker</span>
-    <span id="phase-badge" class="phase-badge">Pre-flop</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="phase-badge" class="phase-badge">Pre-flop</span>
+      <button id="btn-reset-game" style="cursor:pointer;border:1px solid #c0392b;color:#c0392b;background:transparent;font-family:inherit;font-size:0.72rem;font-weight:600;letter-spacing:0.05em;padding:3px 10px;border-radius:99px;">Reset</button>
+    </div>
   </div>
 
   <!-- Players row -->
@@ -1774,6 +1778,40 @@ function showJoinError(msg) {
 }
 
 /* ═══════════════════════════════════════════════════════
+   RESET
+   ═══════════════════════════════════════════════════════ */
+async function onReset() {
+  if (!confirm('Reset the table? This will end the current game and remove all players.')) return;
+  if (isSaving) return;
+  isSaving = true;
+  stopPolling();
+  try {
+    // Fetch current SHA so we can overwrite
+    const fresh = await fetchGame(null);
+    const sha = fresh && fresh !== 'notfound' ? fresh.sha : null;
+    const state = freshTableState();
+    if (sha) {
+      await saveGame(state, sha);
+    } else {
+      await createGameFile(state);
+    }
+    // Reset local state
+    mySlot = -1; myName = '';
+    gameState = null; gameFileSHA = null; gameEtag = null;
+    showingRaise = false;
+    document.getElementById('result-overlay').classList.remove('show');
+    showScreen('join');
+    showToast('Table has been reset');
+  } catch (e) {
+    showToast('Reset failed: ' + e.message);
+    console.error(e);
+    startPolling(); // resume polling on failure
+  } finally {
+    isSaving = false;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
    INIT
    ═══════════════════════════════════════════════════════ */
 function init() {
@@ -1787,6 +1825,8 @@ function init() {
     e.preventDefault();
     await onCashOut();
   });
+  document.getElementById('btn-reset-game').addEventListener('click', onReset);
+  document.getElementById('btn-reset-lobby').addEventListener('click', onReset);
 
   document.getElementById('inp-name').addEventListener('keydown', e => {
     if (e.key === 'Enter') onJoin();
