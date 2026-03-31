@@ -45,6 +45,17 @@
       "inHand": false,
       "lastAction": "",
       "joinedAt": "2026-03-31T23:49:53.160Z"
+    },
+    {
+      "name": "67",
+      "chips": 1000,
+      "bet": 0,
+      "hand": [],
+      "folded": false,
+      "allIn": false,
+      "inHand": false,
+      "lastAction": "",
+      "joinedAt": "2026-03-31T23:50:05.294Z"
     }
   ],
   "handNum": 2,
@@ -109,5 +120,5 @@
   "lastAggressor": 0,
   "roundStartPlayer": 1,
   "actions": [],
-  "updatedAt": "2026-03-31T23:49:53.160Z"
+  "updatedAt": "2026-03-31T23:50:05.294Z"
 }
