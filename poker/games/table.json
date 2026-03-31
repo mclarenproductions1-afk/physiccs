@@ -1,10 +1,10 @@
 {
-  "status": "active",
+  "status": "showdown",
   "players": [
     null,
     {
       "name": "Johnsam Joyson",
-      "chips": 980,
+      "chips": 1020,
       "bet": 0,
       "hand": [
         "10c",
@@ -13,7 +13,7 @@
       "folded": false,
       "allIn": false,
       "inHand": true,
-      "lastAction": "Check",
+      "lastAction": "Wins!",
       "joinedAt": "2026-03-31T01:35:46.223Z"
     },
     {
@@ -24,10 +24,10 @@
         "Jh",
         "8s"
       ],
-      "folded": false,
+      "folded": true,
       "allIn": false,
       "inHand": true,
-      "lastAction": "",
+      "lastAction": "Fold",
       "joinedAt": "2026-03-31T01:36:01.776Z"
     },
     null,
@@ -36,7 +36,7 @@
   ],
   "handNum": 2,
   "dealer": 2,
-  "phase": "flop",
+  "phase": "showdown",
   "deck": [
     "7s",
     "8h",
@@ -89,11 +89,11 @@
     "Kh",
     "2h"
   ],
-  "pot": 40,
+  "pot": 0,
   "sidePots": [],
   "currentBet": 0,
   "minRaise": 20,
-  "currentTurn": 2,
+  "currentTurn": -1,
   "lastAggressor": 1,
   "roundStartPlayer": 2,
   "actions": [
@@ -101,14 +101,19 @@
       "slot": 1,
       "action": "check",
       "amount": 0
-    }
-  ],
-  "updatedAt": "2026-03-31T01:39:21.798Z",
-  "lastWinners": [
+    },
     {
       "slot": 2,
-      "hand": "Straight",
-      "amount": 3000
+      "action": "fold",
+      "amount": 0
+    }
+  ],
+  "updatedAt": "2026-03-31T01:39:37.568Z",
+  "lastWinners": [
+    {
+      "slot": 1,
+      "hand": "All others folded",
+      "amount": 40
     }
   ]
 }
