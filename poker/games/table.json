@@ -4,7 +4,7 @@
     {
       "name": "67",
       "chips": 980,
-      "bet": 20,
+      "bet": 0,
       "hand": [
         "7s",
         "2c"
@@ -12,13 +12,13 @@
       "folded": false,
       "allIn": false,
       "inHand": true,
-      "lastAction": "Call",
+      "lastAction": "",
       "joinedAt": "2026-03-31T23:50:39.289Z"
     },
     {
       "name": "42",
       "chips": 980,
-      "bet": 20,
+      "bet": 0,
       "hand": [
         "5d",
         "3c"
@@ -26,13 +26,13 @@
       "folded": false,
       "allIn": false,
       "inHand": true,
-      "lastAction": "Call",
+      "lastAction": "",
       "joinedAt": "2026-03-31T23:50:48.528Z"
     },
     {
       "name": "Ryan",
-      "chips": 990,
-      "bet": 10,
+      "chips": 980,
+      "bet": 0,
       "hand": [
         "Jc",
         "2h"
@@ -40,13 +40,13 @@
       "folded": false,
       "allIn": false,
       "inHand": true,
-      "lastAction": "SB",
+      "lastAction": "",
       "joinedAt": "2026-03-31T23:50:42.538Z"
     },
     {
       "name": "Dih Lord",
       "chips": 980,
-      "bet": 20,
+      "bet": 0,
       "hand": [
         "Qs",
         "Jd"
@@ -54,7 +54,7 @@
       "folded": false,
       "allIn": false,
       "inHand": true,
-      "lastAction": "BB",
+      "lastAction": "",
       "joinedAt": "2026-03-31T23:50:43.322Z"
     },
     null,
@@ -63,7 +63,7 @@
   "queue": [],
   "handNum": 1,
   "dealer": 1,
-  "phase": "preflop",
+  "phase": "flop",
   "deck": [
     "Js",
     "3s",
@@ -105,31 +105,21 @@
     "6h",
     "6c",
     "4h",
-    "As",
-    "7h",
-    "Jh",
-    "Kh"
+    "As"
   ],
-  "communityCards": [],
-  "pot": 70,
+  "communityCards": [
+    "Kh",
+    "Jh",
+    "7h"
+  ],
+  "pot": 80,
   "sidePots": [],
-  "currentBet": 20,
+  "currentBet": 0,
   "minRaise": 20,
   "currentTurn": 2,
-  "turnStartedAt": "2026-03-31T23:51:51.090Z",
-  "lastAggressor": 3,
+  "turnStartedAt": "2026-03-31T23:52:01.226Z",
+  "lastAggressor": 2,
   "roundStartPlayer": 3,
-  "actions": [
-    {
-      "slot": 0,
-      "action": "call",
-      "amount": 20
-    },
-    {
-      "slot": 1,
-      "action": "call",
-      "amount": 20
-    }
-  ],
-  "updatedAt": "2026-03-31T23:51:51.090Z"
+  "actions": [],
+  "updatedAt": "2026-03-31T23:52:01.226Z"
 }
