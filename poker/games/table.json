@@ -1,20 +1,7 @@
 {
   "status": "active",
   "players": [
-    {
-      "name": "67",
-      "chips": 880,
-      "bet": 0,
-      "hand": [
-        "10d",
-        "7h"
-      ],
-      "folded": false,
-      "allIn": false,
-      "inHand": true,
-      "lastAction": "",
-      "joinedAt": "2026-03-31T23:48:52.483Z"
-    },
+    null,
     {
       "name": "cameron",
       "chips": 900,
@@ -110,5 +97,5 @@
   "lastAggressor": 0,
   "roundStartPlayer": 1,
   "actions": [],
-  "updatedAt": "2026-03-31T23:49:37.087Z"
+  "updatedAt": "2026-03-31T23:49:50.386Z"
 }
