@@ -13,9 +13,7 @@
       "allIn": false,
       "inHand": true,
       "lastAction": "SB",
-      "joinedAt": "2026-03-31T23:48:52.483Z",
-      "isBB": true,
-      "isSB": true
+      "joinedAt": "2026-03-31T23:48:52.483Z"
     },
     {
       "name": "cameron",
@@ -29,14 +27,12 @@
       "allIn": false,
       "inHand": true,
       "lastAction": "BB",
-      "joinedAt": "2026-03-31T23:48:56.208Z",
-      "isDealer": true,
-      "isBB": true
+      "joinedAt": "2026-03-31T23:48:56.208Z"
     },
     {
       "name": "Dih Lord",
-      "chips": 990,
-      "bet": 0,
+      "chips": 890,
+      "bet": 100,
       "hand": [
         "Kd",
         "Ac"
@@ -44,10 +40,8 @@
       "folded": false,
       "allIn": false,
       "inHand": true,
-      "lastAction": "",
-      "joinedAt": "2026-03-31T23:49:00.834Z",
-      "isSB": true,
-      "isDealer": true
+      "lastAction": "Raise 100",
+      "joinedAt": "2026-03-31T23:49:00.834Z"
     },
     null,
     null,
@@ -106,14 +100,20 @@
     "9s"
   ],
   "communityCards": [],
-  "pot": 30,
+  "pot": 130,
   "sidePots": [],
-  "currentBet": 20,
-  "minRaise": 20,
-  "currentTurn": 2,
-  "turnStartedAt": "2026-03-31T23:49:06.161Z",
-  "lastAggressor": 1,
+  "currentBet": 100,
+  "minRaise": 80,
+  "currentTurn": 0,
+  "turnStartedAt": "2026-03-31T23:49:25.271Z",
+  "lastAggressor": 2,
   "roundStartPlayer": 1,
-  "actions": [],
-  "updatedAt": "2026-03-31T23:49:06.161Z"
+  "actions": [
+    {
+      "slot": 2,
+      "action": "raise",
+      "amount": 100
+    }
+  ],
+  "updatedAt": "2026-03-31T23:49:25.271Z"
 }
