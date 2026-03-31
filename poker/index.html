@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #fff;
+  --text: #111;
+  --muted: #888;
+  --border: #e5e5e5;
+  --surface: #fafafa;
+  --table: #0d0d0d;
+  --table-felt: #111;
+}
+
+html { font-size: 16px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.screen { display: none; }
+.screen.active { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── Join & Lobby ── */
+.center-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+.card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 40px;
+  width: 100%;
+  max-width: 440px;
+}
+.card h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 6px; }
+.card h2 { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 16px; }
+.card p.sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+
+input[type="text"] {
+  width: 100%; border: 1px solid var(--border); border-radius: 4px;
+  padding: 9px 12px; font-size: 0.88rem; font-family: inherit;
+  color: var(--text); background: var(--bg); outline: none;
+  transition: border-color 0.15s; margin-bottom: 10px; display: block;
+}
+input[type="text"]:focus { border-color: var(--text); }
+
+.btn {
+  background: #111; color: #fff; border: none; border-radius: 4px;
+  padding: 9px 18px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; font-family: inherit; letter-spacing: -0.01em;
+  transition: background 0.15s; white-space: nowrap;
+}
+.btn:hover { background: #333; }
+.btn:disabled { background: #ccc; cursor: not-allowed; }
+.btn-outline {
+  background: transparent; color: var(--text); border: 1px solid var(--border);
+}
+.btn-outline:hover { border-color: var(--text); background: transparent; }
+.btn-danger { background: #c0392b; }
+.btn-danger:hover { background: #e74c3c; }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); font-weight: 500; }
+.btn-ghost:hover { color: var(--text); border-color: var(--text); background: transparent; }
+
+.error-msg { font-size: 0.78rem; color: #c0392b; margin-top: 10px; min-height: 18px; }
+
+/* Lobby player slots */
+.slots { margin: 16px 0 20px; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.slot { display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-size: 0.82rem; border-bottom: 1px solid var(--border); }
+.slot:last-child { border-bottom: none; }
+.slot-num { color: var(--muted); font-size: 0.75rem; width: 14px; flex-shrink: 0; }
+.slot-name { font-weight: 500; flex: 1; }
+.slot-empty { color: var(--muted); font-style: italic; flex: 1; }
+.slot-you { font-size: 0.7rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 1px 6px; }
+.slot-chips { font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* ── Game screen (dark table) ── */
+#screen-game {
+  background: var(--table);
+  color: #fff;
+  min-height: 100vh;
+}
+
+.game-header {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #222;
+}
+.back-link { font-size: 0.78rem; color: #666; text-decoration: none; transition: color 0.15s; }
+.back-link:hover { color: #aaa; }
+.game-title { font-size: 0.85rem; font-weight: 600; color: #aaa; }
+.phase-badge {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; color: #666; background: #1a1a1a;
+  border: 1px solid #333; border-radius: 99px; padding: 3px 10px;
+}
+
+/* Players row */
+.players-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 12px 8px;
+  flex-wrap: wrap;
+}
+.player-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #1a1a1a;
+  border: 1.5px solid #2a2a2a;
+  min-width: 68px;
+  position: relative;
+  transition: border-color 0.2s;
+}
+.player-chip.active-turn { border-color: #fff; }
+.player-chip.folded { opacity: 0.35; }
+.player-chip.you { border-color: #555; }
+.player-chip.winner { border-color: #d4af37; }
+.player-name {
+  font-size: 0.72rem; font-weight: 600; color: #ccc;
+  max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.player-chips-amt {
+  font-size: 0.78rem; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.player-bet-amt {
+  font-size: 0.65rem; color: #999;
+  font-variant-numeric: tabular-nums;
+}
+.player-status-badge {
+  position: absolute;
+  top: -8px; right: -8px;
+  font-size: 0.6rem; font-weight: 700;
+  background: #fff; color: #000;
+  border-radius: 99px; padding: 1px 5px;
+  letter-spacing: 0.03em;
+}
+.player-status-badge.dealer { background: #d4af37; color: #000; }
+.player-status-badge.sb { background: #555; color: #fff; }
+.player-status-badge.bb { background: #333; color: #fff; }
+.player-action-label {
+  font-size: 0.6rem; color: #666; margin-top: 1px;
+}
+
+/* Community cards area */
+.table-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 16px 12px;
+  gap: 10px;
+}
+.pot-line {
+  font-size: 0.8rem; color: #999; font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.pot-line strong { color: #fff; font-size: 0.95rem; }
+.community-cards {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Card styles */
+.card-el {
+  width: 54px; height: 76px;
+  background: #fff;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 5px 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  position: relative;
+  flex-shrink: 0;
+}
+.card-el.back {
+  background: #1e1e1e;
+  background-image: repeating-linear-gradient(
+    45deg, #2a2a2a, #2a2a2a 4px, #1e1e1e 4px, #1e1e1e 8px
+  );
+  border: 1px solid #333;
+}
+.card-el.empty {
+  background: transparent;
+  border: 2px dashed #333;
+  box-shadow: none;
+}
+.card-rank {
+  font-size: 1rem; font-weight: 800; line-height: 1;
+  color: inherit;
+}
+.card-suit { font-size: 1.1rem; line-height: 1; }
+.card-el.red { color: #e53e3e; }
+.card-el.black { color: #111; }
+.card-rank-sm { font-size: 0.65rem; font-weight: 700; }
+
+/* Hole cards area */
+.bottom-area {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 8px 16px 12px;
+  gap: 10px;
+  margin-top: auto;
+}
+.hole-cards {
+  display: flex;
+  gap: -4px;
+  position: relative;
+}
+.hole-cards .card-el:first-child { transform: rotate(-4deg); }
+.hole-cards .card-el:last-child { transform: rotate(4deg) translateX(-8px); }
+.hand-info {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 8px 14px;
+  text-align: center;
+  min-width: 80px;
+}
+.hand-label { font-size: 0.65rem; color: #666; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+.hand-name { font-size: 0.82rem; font-weight: 700; color: #fff; }
+.hand-chips { font-size: 0.72rem; color: #999; font-variant-numeric: tabular-nums; margin-top: 2px; }
+
+/* Action buttons */
+.action-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid #1a1a1a;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.action-btn {
+  flex: 1;
+  background: #1e1e1e;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 12px 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+  min-width: 80px;
+  text-align: center;
+}
+.action-btn:hover { background: #2a2a2a; border-color: #555; }
+.action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.action-btn.primary { background: #fff; color: #000; border-color: #fff; }
+.action-btn.primary:hover { background: #e5e5e5; }
+.action-btn.fold { background: #1a1a1a; color: #888; border-color: #2a2a2a; }
+.action-btn.fold:hover { color: #ccc; border-color: #555; }
+
+.raise-row {
+  display: flex;
+  gap: 6px;
+  padding: 0 16px 10px;
+  align-items: center;
+}
+.raise-input {
+  flex: 1;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+}
+.raise-input:focus { border-color: #666; }
+.raise-preset {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  color: #888;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s, border-color 0.15s;
+}
+.raise-preset:hover { color: #fff; border-color: #555; }
+
+.waiting-msg {
+  padding: 14px 16px;
+  font-size: 0.8rem;
+  color: #555;
+  text-align: center;
+}
+
+/* Winner/Result overlay */
+.result-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  display: none;
+}
+.result-overlay.show { display: flex; }
+.result-card {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 28px 32px;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+}
+.result-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #666; margin-bottom: 8px; }
+.result-winner { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.result-hand { font-size: 0.85rem; color: #d4af37; margin-bottom: 16px; }
+.result-chips { font-size: 0.82rem; color: #888; margin-bottom: 20px; }
+.result-list { text-align: left; margin-bottom: 20px; }
+.result-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 0; border-bottom: 1px solid #222;
+  font-size: 0.8rem;
+}
+.result-row:last-child { border-bottom: none; }
+.result-row-name { flex: 1; color: #ccc; }
+.result-row-hand { color: #888; font-size: 0.72rem; }
+.result-row-chips { color: #fff; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ── Toast ── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: #fff; color: #111;
+  padding: 9px 18px; border-radius: 4px;
+  font-size: 0.8rem; font-weight: 500;
+  opacity: 0; transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none; z-index: 999; white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Winner screen ── */
+#screen-winner .center-wrap { text-align: center; }
+.finish-list { margin: 20px 0 24px; text-align: left; }
+.finish-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+.finish-row:last-child { border-bottom: none; }
+.finish-rank { color: var(--muted); font-variant-numeric: tabular-nums; width: 20px; }
+
+@media (max-width: 480px) {
+  .card { padding: 28px 20px; }
+  .card-el { width: 46px; height: 64px; }
+  .card-rank { font-size: 0.85rem; }
+  .card-suit { font-size: 0.95rem; }
+  .action-btn { padding: 10px 6px; font-size: 0.78rem; }
+  .players-row { gap: 6px; }
+  .player-chip { min-width: 58px; padding: 6px 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ JOIN SCREEN ═══ -->
+<div id="screen-join" class="screen active">
+  <div class="center-wrap">
+    <div class="card">
+      <h1>Poker</h1>
+      <p class="sub">Texas Hold'em — up to 6 players. One shared table, no room codes needed.</p>
+      <input id="inp-name" type="text" placeholder="Your name" maxlength="20" autocomplete="off" />
+      <button id="btn-join" class="btn" style="width:100%">Join Table</button>
+      <div id="join-error" class="error-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOBBY SCREEN ═══ -->
+<div id="screen-lobby" class="screen">
+  <div class="center-wrap">
+    <div class="card">
+      <h2>Waiting for players</h2>
+      <p class="sub" style="margin-bottom:12px">Share this link with friends to join the table.</p>
+      <div id="lby-slots" class="slots"></div>
+      <button id="btn-start" class="btn" style="width:100%;display:none">Start Game</button>
+      <p id="lby-status" style="font-size:0.78rem;color:var(--muted);margin-top:10px;text-align:center"></p>
+      <div style="margin-top:16px">
+        <button id="btn-leave" class="btn btn-outline" style="width:100%;font-size:0.78rem">Leave Table</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GAME SCREEN ═══ -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <a href="/poker" id="btn-exit-game" class="back-link">← Leave</a>
+    <span class="game-title">Poker</span>
+    <span id="phase-badge" class="phase-badge">Pre-flop</span>
+  </div>
+
+  <!-- Players row -->
+  <div id="players-row" class="players-row"></div>
+
+  <!-- Community cards + pot -->
+  <div class="table-area">
+    <div class="pot-line">Pot: <strong id="pot-display">0</strong></div>
+    <div id="community-cards" class="community-cards"></div>
+    <div id="side-pot-line" style="font-size:0.72rem;color:#666;display:none"></div>
+  </div>
+
+  <!-- Hole cards + hand info -->
+  <div class="bottom-area">
+    <div id="hole-cards" class="hole-cards"></div>
+    <div id="hand-info" class="hand-info" style="display:none">
+      <div class="hand-label">Your hand</div>
+      <div id="hand-name" class="hand-name">—</div>
+      <div id="hand-my-chips" class="hand-chips"></div>
+    </div>
+  </div>
+
+  <!-- Raise amount row (hidden unless raising) -->
+  <div id="raise-row" class="raise-row" style="display:none">
+    <input id="raise-input" class="raise-input" type="number" min="1" placeholder="Raise amount" />
+    <button class="raise-preset" onclick="setRaisePreset(0.5)">½</button>
+    <button class="raise-preset" onclick="setRaisePreset(1)">Pot</button>
+    <button class="raise-preset" onclick="setRaisePreset(2)">2×</button>
+    <button class="raise-preset" onclick="setRaisePreset(999)">All-in</button>
+  </div>
+
+  <!-- Action buttons -->
+  <div id="action-row" class="action-row"></div>
+  <div id="waiting-msg" class="waiting-msg"></div>
+</div>
+
+<!-- ═══ RESULT OVERLAY ═══ -->
+<div id="result-overlay" class="result-overlay">
+  <div class="result-card">
+    <div class="result-title">Hand Over</div>
+    <div id="res-winner" class="result-winner"></div>
+    <div id="res-hand" class="result-hand"></div>
+    <div id="res-chips" class="result-chips"></div>
+    <div id="res-list" class="result-list"></div>
+    <button id="btn-next-hand" class="btn" style="width:100%;margin-bottom:8px">Next Hand</button>
+    <button id="btn-cash-out" class="btn btn-ghost" style="width:100%;font-size:0.78rem">Cash Out & Leave</button>
+  </div>
+</div>
+
+<!-- ═══ END SCREEN ═══ -->
+<div id="screen-end" class="screen">
+  <div class="center-wrap">
+    <div class="card" style="text-align:center">
+      <h1 id="end-title">Game Over</h1>
+      <p style="color:var(--muted);font-size:0.85rem;margin:8px 0 20px" id="end-sub"></p>
+      <div id="end-list" class="finish-list"></div>
+      <button id="btn-home" class="btn" style="width:100%">Back to Start</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONFIG
+   ═══════════════════════════════════════════════════════ */
+const CONFIG = {
+  owner:  "mclarenproductions1-afk",
+  repo:   "RyansSITE",
+  branch: "main",
+  token:  ["github_pat_11CASFLQI0", "mSMwrQorr6is_8w1PYxuskuOF567X3WQslSr67uzWaYNVODD8nx0icOqEJFVHH5I2dQXuhPy"].join("")
+};
+
+const GAME_FILE = "poker/games/table.json";
+const STARTING_CHIPS = 1000;
+const SMALL_BLIND = 10;
+const BIG_BLIND = 20;
+const MAX_PLAYERS = 6;
+
+/* ═══════════════════════════════════════════════════════
+   CLIENT STATE
+   ═══════════════════════════════════════════════════════ */
+let myName      = "";
+let mySlot      = -1;
+let gameFileSHA = null;
+let gameEtag    = null;
+let gameState   = null;
+let pollTimer   = null;
+let isSaving    = false;
+let toastTimer  = null;
+let showingRaise = false;
+
+/* ═══════════════════════════════════════════════════════
+   CARD UTILS
+   ═══════════════════════════════════════════════════════ */
+const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const SUITS = ['c','d','h','s']; // clubs, diamonds, hearts, spades
+const SUIT_SYMBOLS = { c: '♣', d: '♦', h: '♥', s: '♠' };
+const RED_SUITS = new Set(['d','h']);
+
+function buildDeck() {
+  const deck = [];
+  for (const s of SUITS) for (const r of RANKS) deck.push(r + s);
+  return deck;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function cardRank(card) { return RANKS.indexOf(card.slice(0, -1)); }
+function cardSuit(card) { return card.slice(-1); }
+
+function renderCard(card, hidden) {
+  const el = document.createElement('div');
+  if (!card) {
+    el.className = 'card-el empty';
+    return el;
+  }
+  if (hidden) {
+    el.className = 'card-el back';
+    return el;
+  }
+  const suit = cardSuit(card);
+  const rank = card.slice(0, -1);
+  el.className = 'card-el ' + (RED_SUITS.has(suit) ? 'red' : 'black');
+  const top = document.createElement('div');
+  top.innerHTML = `<div class="card-rank">${rank}</div><div class="card-suit">${SUIT_SYMBOLS[suit]}</div>`;
+  el.appendChild(top);
+  return el;
+}
+
+/* ═══════════════════════════════════════════════════════
+   HAND EVALUATION
+   ═══════════════════════════════════════════════════════ */
+function evaluateHand(cards) {
+  // cards: array of card strings (2-7), returns { rank, name, best5 }
+  if (!cards || cards.length < 2) return { rank: 0, name: '—', best5: [] };
+
+  const all = cards.filter(Boolean);
+  if (all.length < 2) return { rank: 0, name: '—', best5: [] };
+
+  // Generate all 5-card combos from available cards
+  function combos(arr, k) {
+    if (k === 0) return [[]];
+    if (arr.length < k) return [];
+    const [first, ...rest] = arr;
+    return [...combos(rest, k - 1).map(c => [first, ...c]), ...combos(rest, k)];
+  }
+
+  const hands = all.length <= 5 ? [all] : combos(all, 5);
+  let best = null;
+  for (const h of hands) {
+    const v = score5(h);
+    if (!best || v.rank > best.rank) best = { ...v, best5: h };
+  }
+  return best;
+}
+
+function score5(cards) {
+  const ranks = cards.map(cardRank).sort((a, b) => b - a);
+  const suits = cards.map(cardSuit);
+  const flush = suits.every(s => s === suits[0]);
+  const counts = {};
+  for (const r of ranks) counts[r] = (counts[r] || 0) + 1;
+  const groups = Object.values(counts).sort((a, b) => b - a);
+  const uniq = [...new Set(ranks)].sort((a, b) => b - a);
+
+  // Straight check (including A-low: A2345)
+  let straight = false, straightHigh = 0;
+  if (uniq.length === 5) {
+    if (uniq[0] - uniq[4] === 4) { straight = true; straightHigh = uniq[0]; }
+    // wheel
+    if (JSON.stringify(uniq) === JSON.stringify([12,3,2,1,0])) { straight = true; straightHigh = 3; }
+  }
+
+  const r = ranks[0]; // high card rank
+  if (flush && straight) return { rank: straightHigh === 12 ? 9e9 : 8e9 + straightHigh, name: straightHigh === 12 ? 'Royal Flush' : 'Straight Flush' };
+  if (groups[0] === 4) return { rank: 7e9 + +Object.keys(counts).find(k => counts[k] === 4), name: 'Four of a Kind' };
+  if (groups[0] === 3 && groups[1] === 2) return { rank: 6e9, name: 'Full House' };
+  if (flush) return { rank: 5e9 + ranks.reduce((a, v, i) => a + v * Math.pow(15, 4 - i), 0), name: 'Flush' };
+  if (straight) return { rank: 4e9 + straightHigh, name: 'Straight' };
+  if (groups[0] === 3) return { rank: 3e9 + +Object.keys(counts).find(k => counts[k] === 3), name: 'Three of a Kind' };
+  if (groups[0] === 2 && groups[1] === 2) return { rank: 2e9, name: 'Two Pair' };
+  if (groups[0] === 2) return { rank: 1e9 + +Object.keys(counts).find(k => counts[k] === 2), name: 'Pair' };
+  return { rank: ranks.reduce((a, v, i) => a + v * Math.pow(15, 4 - i), 0), name: 'High Card' };
+}
+
+/* ═══════════════════════════════════════════════════════
+   GITHUB API
+   ═══════════════════════════════════════════════════════ */
+function gameApiUrl() {
+  return `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${GAME_FILE}`;
+}
+
+function ghHeaders(extra) {
+  return Object.assign({
+    "Authorization": `Bearer ${CONFIG.token}`,
+    "Accept":        "application/vnd.github+json",
+    "Content-Type":  "application/json"
+  }, extra || {});
+}
+
+async function fetchGame(etag) {
+  const headers = ghHeaders();
+  if (etag) headers["If-None-Match"] = etag;
+  const res = await fetch(gameApiUrl(), { headers });
+  if (res.status === 304) return null;
+  if (res.status === 404) return "notfound";
+  if (!res.ok) throw new Error(`GitHub ${res.status}`);
+  const data = await res.json();
+  const newEtag = res.headers.get("ETag");
+  const state = JSON.parse(atob(data.content.replace(/\s/g, "")));
+  return { state, sha: data.sha, etag: newEtag };
+}
+
+async function saveGame(state, sha) {
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
+  const body = {
+    message: `poker: ${state.phase} hand${state.handNum}`,
+    content,
+    branch: CONFIG.branch,
+    sha
+  };
+  const res = await fetch(gameApiUrl(), {
+    method: "PUT",
+    headers: ghHeaders(),
+    body: JSON.stringify(body)
+  });
+  if (res.status === 409) {
+    const fresh = await fetchGame(null);
+    if (fresh && fresh !== "notfound") {
+      gameFileSHA = fresh.sha;
+      gameEtag    = fresh.etag;
+      applyGameState(fresh.state);
+    }
+    throw new Error("conflict");
+  }
+  if (!res.ok) throw new Error(`GitHub ${res.status}`);
+  const data = await res.json();
+  return data.content.sha;
+}
+
+async function createGameFile(state) {
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
+  const body = { message: "poker: create table", content, branch: CONFIG.branch };
+  const res = await fetch(gameApiUrl(), {
+    method: "PUT",
+    headers: ghHeaders(),
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`Create failed: ${res.status}`);
+  const data = await res.json();
+  return data.content.sha;
+}
+
+/* ═══════════════════════════════════════════════════════
+   GAME STATE HELPERS
+   ═══════════════════════════════════════════════════════ */
+function freshTableState() {
+  return {
+    status: "waiting",
+    players: new Array(MAX_PLAYERS).fill(null),
+    handNum: 0,
+    dealer: 0,
+    phase: "waiting",        // waiting|preflop|flop|turn|river|showdown
+    deck: [],
+    communityCards: [],
+    pot: 0,
+    sidePots: [],
+    currentBet: 0,
+    minRaise: BIG_BLIND,
+    currentTurn: -1,
+    lastAggressor: -1,
+    roundStartPlayer: -1,
+    actions: [],             // { slot, action, amount } log for current round
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function activePlayers(state) {
+  return state.players
+    .map((p, i) => ({ ...p, slot: i }))
+    .filter(p => p && !p.folded && p.chips + p.bet > 0);
+}
+
+function playersInHand(state) {
+  return state.players
+    .map((p, i) => ({ ...p, slot: i }))
+    .filter(p => p && p.inHand);
+}
+
+function nextActiveSlot(state, from) {
+  for (let i = 1; i <= MAX_PLAYERS; i++) {
+    const slot = (from + i) % MAX_PLAYERS;
+    const p = state.players[slot];
+    if (p && p.inHand && !p.folded && !p.allIn) return slot;
+  }
+  return -1;
+}
+
+function countCanAct(state) {
+  return state.players.filter(p => p && p.inHand && !p.folded && !p.allIn).length;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DEAL / BETTING LOGIC
+   ═══════════════════════════════════════════════════════ */
+function startNewHand(state) {
+  const active = state.players.map((p, i) => [p, i]).filter(([p]) => p && p.chips > 0);
+  if (active.length < 2) return state; // can't start
+
+  state.handNum = (state.handNum || 0) + 1;
+
+  // Reset per-hand player state
+  for (let i = 0; i < MAX_PLAYERS; i++) {
+    const p = state.players[i];
+    if (!p) continue;
+    if (p.chips <= 0) {
+      state.players[i] = null; // remove broke players
+      if (i === mySlot) mySlot = -1;
+      continue;
+    }
+    p.hand = [];
+    p.bet = 0;
+    p.folded = false;
+    p.allIn = false;
+    p.inHand = true;
+    p.lastAction = '';
+  }
+
+  // Advance dealer
+  let dealer = (state.dealer + 1) % MAX_PLAYERS;
+  let safety = 0;
+  while (!state.players[dealer] && safety++ < MAX_PLAYERS) dealer = (dealer + 1) % MAX_PLAYERS;
+  state.dealer = dealer;
+
+  // Deck
+  state.deck = shuffle(buildDeck());
+  state.communityCards = [];
+  state.pot = 0;
+  state.sidePots = [];
+  state.currentBet = BIG_BLIND;
+  state.minRaise = BIG_BLIND;
+  state.actions = [];
+
+  // Deal 2 cards to each player in hand (in slot order)
+  const inHand = state.players.map((p, i) => i).filter(i => state.players[i] && state.players[i].inHand);
+  for (const slot of inHand) {
+    state.players[slot].hand = [state.deck.pop(), state.deck.pop()];
+    state.players[slot].bet = 0;
+  }
+
+  // Post blinds
+  function nextFrom(from) {
+    for (let i = 1; i <= MAX_PLAYERS; i++) {
+      const s = (from + i) % MAX_PLAYERS;
+      if (state.players[s] && state.players[s].inHand) return s;
+    }
+    return -1;
+  }
+
+  const sbSlot = nextFrom(dealer);
+  const bbSlot = nextFrom(sbSlot);
+
+  function postBlind(slot, amount) {
+    const p = state.players[slot];
+    const actual = Math.min(amount, p.chips);
+    p.chips -= actual;
+    p.bet += actual;
+    state.pot += actual;
+    if (p.chips === 0) p.allIn = true;
+  }
+
+  postBlind(sbSlot, SMALL_BLIND);
+  postBlind(bbSlot, BIG_BLIND);
+
+  state.players[sbSlot].lastAction = 'SB';
+  state.players[bbSlot].lastAction = 'BB';
+
+  // UTG starts
+  const utgSlot = nextFrom(bbSlot);
+  state.currentTurn = utgSlot;
+  state.lastAggressor = bbSlot;
+  state.roundStartPlayer = bbSlot; // betting ends when action returns to BB (if no raise)
+
+  state.phase = 'preflop';
+  state.status = 'active';
+  state.updatedAt = new Date().toISOString();
+
+  // Decorations
+  state.players[dealer].isDealer = true;
+  if (state.players[sbSlot]) state.players[sbSlot].isSB = true;
+  if (state.players[bbSlot]) state.players[bbSlot].isBB = true;
+
+  return state;
+}
+
+function applyAction(state, slot, action, amount) {
+  const p = state.players[slot];
+  if (!p || state.currentTurn !== slot) return state;
+
+  // Clear dealer/blind decorations
+  for (const pl of state.players) {
+    if (!pl) continue;
+    delete pl.isDealer; delete pl.isSB; delete pl.isBB;
+  }
+
+  const toCall = state.currentBet - p.bet;
+
+  if (action === 'fold') {
+    p.folded = true;
+    p.lastAction = 'Fold';
+  } else if (action === 'check') {
+    p.lastAction = 'Check';
+  } else if (action === 'call') {
+    const callAmt = Math.min(toCall, p.chips);
+    p.chips -= callAmt;
+    p.bet += callAmt;
+    state.pot += callAmt;
+    if (p.chips === 0) p.allIn = true;
+    p.lastAction = p.allIn ? 'All-in' : 'Call';
+  } else if (action === 'raise') {
+    const totalBet = Math.min(amount, p.chips + p.bet);
+    const added = totalBet - p.bet;
+    p.chips -= added;
+    state.pot += added;
+    p.bet = totalBet;
+    if (p.chips === 0) p.allIn = true;
+    state.minRaise = totalBet - state.currentBet;
+    state.currentBet = totalBet;
+    state.lastAggressor = slot;
+    p.lastAction = p.allIn ? 'All-in' : `Raise ${totalBet}`;
+  }
+
+  state.actions.push({ slot, action, amount });
+
+  // Check if betting round is over
+  const canAct = state.players.filter(p => p && p.inHand && !p.folded && !p.allIn);
+  const allMatched = canAct.every(pl => pl.bet >= state.currentBet || pl.allIn);
+  // Betting ends when action reaches last aggressor (everyone's had a chance)
+  const nextSlot = nextActiveSlot(state, slot);
+
+  // Check fold-out (only 1 left in hand)
+  const stillIn = state.players.filter(p => p && p.inHand && !p.folded);
+  if (stillIn.length === 1) {
+    return resolveHand(state, stillIn[0]);
+  }
+
+  const bettingDone = allMatched && (nextSlot === state.lastAggressor || canAct.length === 0 || (canAct.length === 1 && action !== 'raise'));
+
+  if (bettingDone || canAct.length === 0) {
+    return advancePhase(state);
+  } else {
+    state.currentTurn = nextSlot === -1 ? advancePhaseIfNeeded(state) : nextSlot;
+  }
+
+  state.updatedAt = new Date().toISOString();
+  return state;
+}
+
+function advancePhaseIfNeeded(state) {
+  return -1;
+}
+
+function advancePhase(state) {
+  // Reset bets for new round
+  for (const p of state.players) {
+    if (p) { state.pot += 0; p.bet = 0; p.lastAction = ''; }
+  }
+  state.currentBet = 0;
+  state.minRaise = BIG_BLIND;
+  state.actions = [];
+
+  // Find first active from dealer
+  function nextFrom(from) {
+    for (let i = 1; i <= MAX_PLAYERS; i++) {
+      const s = (from + i) % MAX_PLAYERS;
+      const p = state.players[s];
+      if (p && p.inHand && !p.folded && !p.allIn) return s;
+    }
+    return -1;
+  }
+
+  const phases = ['preflop', 'flop', 'turn', 'river', 'showdown'];
+  const idx = phases.indexOf(state.phase);
+
+  if (state.phase === 'preflop') {
+    state.communityCards = [state.deck.pop(), state.deck.pop(), state.deck.pop()];
+    state.phase = 'flop';
+  } else if (state.phase === 'flop') {
+    state.communityCards.push(state.deck.pop());
+    state.phase = 'turn';
+  } else if (state.phase === 'turn') {
+    state.communityCards.push(state.deck.pop());
+    state.phase = 'river';
+  } else if (state.phase === 'river') {
+    return resolveHand(state, null);
+  }
+
+  const stillActive = state.players.filter(p => p && p.inHand && !p.folded && !p.allIn);
+  if (stillActive.length <= 1) {
+    return resolveHand(state, null);
+  }
+
+  state.lastAggressor = nextFrom(state.dealer);
+  state.currentTurn = nextFrom(state.dealer);
+  state.updatedAt = new Date().toISOString();
+  return state;
+}
+
+function resolveHand(state, forcedWinner) {
+  state.phase = 'showdown';
+
+  const inHand = state.players
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => p && p.inHand && !p.folded);
+
+  let winners = [];
+
+  if (forcedWinner || inHand.length === 1) {
+    const winner = forcedWinner || inHand[0].p;
+    const winnerIdx = state.players.indexOf(winner);
+    winner.chips += state.pot;
+    winner.lastAction = 'Wins!';
+    state.lastWinners = [{ slot: winnerIdx, hand: 'All others folded', amount: state.pot }];
+    state.pot = 0;
+  } else {
+    // Evaluate all hands
+    const results = inHand.map(({ p, i }) => {
+      const allCards = [...(p.hand || []), ...(state.communityCards || [])];
+      const ev = evaluateHand(allCards);
+      return { slot: i, p, score: ev.rank, handName: ev.name };
+    });
+    results.sort((a, b) => b.score - a.score);
+    const topScore = results[0].score;
+    const tied = results.filter(r => r.score === topScore);
+    const share = Math.floor(state.pot / tied.length);
+    let remainder = state.pot - share * tied.length;
+
+    state.lastWinners = tied.map(r => {
+      r.p.chips += share + (remainder-- > 0 ? 1 : 0);
+      r.p.lastAction = 'Wins!';
+      return { slot: r.slot, hand: r.handName, amount: share };
+    });
+    state.pot = 0;
+  }
+
+  state.status = 'showdown';
+  state.currentTurn = -1;
+  state.updatedAt = new Date().toISOString();
+
+  // Check if game over (only 1 player with chips)
+  const withChips = state.players.filter(p => p && p.chips > 0);
+  if (withChips.length <= 1) {
+    state.status = 'finished';
+  }
+
+  return state;
+}
+
+/* ═══════════════════════════════════════════════════════
+   POLLING
+   ═══════════════════════════════════════════════════════ */
+function startPolling() {
+  stopPolling();
+  pollTimer = setInterval(pollGame, 2500);
+}
+
+function stopPolling() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+
+async function pollGame() {
+  if (isSaving) return;
+  try {
+    const result = await fetchGame(gameEtag);
+    if (!result || result === "notfound") return;
+    gameFileSHA = result.sha;
+    gameEtag    = result.etag;
+    applyGameState(result.state);
+  } catch (e) { /* silent */ }
+}
+
+function applyGameState(newState) {
+  const prev = gameState;
+  gameState = newState;
+
+  if (mySlot >= 0 && newState.players[mySlot] === null) {
+    // We got kicked (e.g. out of chips and hand ended)
+    mySlot = -1;
+  }
+
+  if (newState.status === 'waiting') {
+    if (mySlot >= 0) { showScreen('lobby'); renderLobby(); }
+    else { showScreen('join'); }
+    return;
+  }
+
+  if (newState.status === 'active' || newState.status === 'showdown') {
+    const cur = document.querySelector('.screen.active');
+    if (!cur || cur.id !== 'screen-game') showScreen('game');
+    renderGame();
+
+    if (newState.status === 'showdown' && (!prev || prev.status !== 'showdown')) {
+      renderResultOverlay(newState);
+    }
+    return;
+  }
+
+  if (newState.status === 'finished') {
+    stopPolling();
+    showScreen('end');
+    renderEndScreen();
+    return;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDERING
+   ═══════════════════════════════════════════════════════ */
+function renderGame() {
+  if (!gameState) return;
+  renderPlayersRow();
+  renderCommunityCards();
+  renderHoleCards();
+  renderActions();
+  document.getElementById('pot-display').textContent = gameState.pot;
+  document.getElementById('phase-badge').textContent = phaseLabel(gameState.phase);
+}
+
+function phaseLabel(p) {
+  return { preflop: 'Pre-Flop', flop: 'Flop', turn: 'Turn', river: 'River', showdown: 'Showdown', waiting: 'Waiting' }[p] || p;
+}
+
+function renderPlayersRow() {
+  const row = document.getElementById('players-row');
+  row.innerHTML = '';
+  for (let i = 0; i < MAX_PLAYERS; i++) {
+    const p = gameState.players[i];
+    if (!p) continue;
+    const chip = document.createElement('div');
+    chip.className = 'player-chip';
+    if (i === gameState.currentTurn) chip.classList.add('active-turn');
+    if (p.folded) chip.classList.add('folded');
+    if (i === mySlot) chip.classList.add('you');
+    if (gameState.lastWinners && gameState.lastWinners.find(w => w.slot === i)) chip.classList.add('winner');
+
+    const name = document.createElement('div');
+    name.className = 'player-name';
+    name.textContent = p.name + (i === mySlot ? ' (you)' : '');
+
+    const chips = document.createElement('div');
+    chips.className = 'player-chips-amt';
+    chips.textContent = p.chips;
+
+    chip.appendChild(name);
+    chip.appendChild(chips);
+
+    if (p.bet > 0) {
+      const bet = document.createElement('div');
+      bet.className = 'player-bet-amt';
+      bet.textContent = `bet ${p.bet}`;
+      chip.appendChild(bet);
+    }
+
+    if (p.lastAction) {
+      const act = document.createElement('div');
+      act.className = 'player-action-label';
+      act.textContent = p.lastAction;
+      chip.appendChild(act);
+    }
+
+    // Badges
+    if (p.isDealer) { const b = document.createElement('div'); b.className = 'player-status-badge dealer'; b.textContent = 'D'; chip.appendChild(b); }
+    else if (p.isSB) { const b = document.createElement('div'); b.className = 'player-status-badge sb'; b.textContent = 'SB'; chip.appendChild(b); }
+    else if (p.isBB) { const b = document.createElement('div'); b.className = 'player-status-badge bb'; b.textContent = 'BB'; chip.appendChild(b); }
+
+    row.appendChild(chip);
+  }
+}
+
+function renderCommunityCards() {
+  const el = document.getElementById('community-cards');
+  el.innerHTML = '';
+  const cards = gameState.communityCards || [];
+  for (let i = 0; i < 5; i++) {
+    el.appendChild(renderCard(cards[i] || null, false));
+  }
+}
+
+function renderHoleCards() {
+  const el = document.getElementById('hole-cards');
+  const info = document.getElementById('hand-info');
+  el.innerHTML = '';
+
+  if (mySlot < 0 || !gameState.players[mySlot]) {
+    info.style.display = 'none';
+    return;
+  }
+
+  const me = gameState.players[mySlot];
+  const hand = me.hand || [];
+
+  if (hand.length === 0) {
+    info.style.display = 'none';
+    return;
+  }
+
+  for (const card of hand) el.appendChild(renderCard(card, false));
+
+  // Hand strength
+  const allCards = [...hand, ...(gameState.communityCards || [])];
+  const ev = evaluateHand(allCards);
+  document.getElementById('hand-name').textContent = ev.name;
+  document.getElementById('hand-my-chips').textContent = me.chips + ' chips';
+  info.style.display = 'block';
+}
+
+function renderActions() {
+  const actionRow = document.getElementById('action-row');
+  const waitingMsg = document.getElementById('waiting-msg');
+  actionRow.innerHTML = '';
+  waitingMsg.textContent = '';
+
+  if (mySlot < 0) { waitingMsg.textContent = 'You are spectating.'; return; }
+
+  const me = gameState.players[mySlot];
+  if (!me) { waitingMsg.textContent = 'Waiting for next hand…'; return; }
+
+  if (gameState.status === 'showdown') { return; }
+
+  if (gameState.currentTurn !== mySlot) {
+    const cur = gameState.currentTurn >= 0 ? gameState.players[gameState.currentTurn] : null;
+    waitingMsg.textContent = cur ? `Waiting for ${cur.name}…` : 'Waiting…';
+    return;
+  }
+
+  if (me.folded || me.allIn) { waitingMsg.textContent = me.allIn ? 'You are all-in.' : 'You folded.'; return; }
+
+  const toCall = Math.max(0, gameState.currentBet - me.bet);
+
+  // Fold
+  const foldBtn = document.createElement('button');
+  foldBtn.className = 'action-btn fold';
+  foldBtn.textContent = 'Fold';
+  foldBtn.onclick = () => doAction('fold', 0);
+  actionRow.appendChild(foldBtn);
+
+  // Check or Call
+  const callBtn = document.createElement('button');
+  if (toCall === 0) {
+    callBtn.className = 'action-btn primary';
+    callBtn.textContent = 'Check';
+    callBtn.onclick = () => doAction('check', 0);
+  } else {
+    const callAmt = Math.min(toCall, me.chips);
+    callBtn.className = 'action-btn primary';
+    callBtn.textContent = callAmt >= me.chips ? `All-in ${me.chips}` : `Call ${callAmt}`;
+    callBtn.onclick = () => doAction(callAmt >= me.chips ? 'raise' : 'call', me.bet + callAmt);
+  }
+  actionRow.appendChild(callBtn);
+
+  // Raise (if has enough chips)
+  if (me.chips > toCall) {
+    const raiseBtn = document.createElement('button');
+    raiseBtn.className = 'action-btn';
+    raiseBtn.textContent = showingRaise ? 'Confirm ↑' : 'Raise ↑';
+    raiseBtn.onclick = () => {
+      if (!showingRaise) {
+        showingRaise = true;
+        document.getElementById('raise-row').style.display = 'flex';
+        const input = document.getElementById('raise-input');
+        input.min = Math.min(gameState.currentBet + gameState.minRaise, me.chips + me.bet);
+        input.max = me.chips + me.bet;
+        input.value = Math.min(gameState.currentBet * 2 + gameState.minRaise, me.chips + me.bet);
+        input.focus();
+        renderActions(); // re-render to show confirm
+      } else {
+        const amt = parseInt(document.getElementById('raise-input').value, 10);
+        if (!amt || amt <= gameState.currentBet) { showToast('Enter a valid raise amount'); return; }
+        const capped = Math.min(amt, me.chips + me.bet);
+        showingRaise = false;
+        document.getElementById('raise-row').style.display = 'none';
+        doAction('raise', capped);
+      }
+    };
+    actionRow.appendChild(raiseBtn);
+  }
+}
+
+function setRaisePreset(mult) {
+  const me = gameState && mySlot >= 0 ? gameState.players[mySlot] : null;
+  if (!me) return;
+  const input = document.getElementById('raise-input');
+  let amt;
+  if (mult === 999) {
+    amt = me.chips + me.bet;
+  } else {
+    amt = Math.round(gameState.pot * mult + gameState.currentBet);
+  }
+  input.value = Math.min(amt, me.chips + me.bet);
+}
+
+function renderResultOverlay(state) {
+  if (!state.lastWinners || state.lastWinners.length === 0) return;
+
+  const overlay = document.getElementById('result-overlay');
+  const w = state.lastWinners[0];
+  const wp = state.players[w.slot];
+
+  document.getElementById('res-winner').textContent = wp ? wp.name : '?';
+  document.getElementById('res-hand').textContent = w.hand;
+  document.getElementById('res-chips').textContent = `Won ${w.amount} chips`;
+
+  const list = document.getElementById('res-list');
+  list.innerHTML = '';
+  for (let i = 0; i < MAX_PLAYERS; i++) {
+    const p = state.players[i];
+    if (!p) continue;
+    const row = document.createElement('div');
+    row.className = 'result-row';
+    const nm = document.createElement('div');
+    nm.className = 'result-row-name';
+    nm.textContent = p.name + (i === mySlot ? ' (you)' : '');
+    const hd = document.createElement('div');
+    hd.className = 'result-row-hand';
+    if (p.inHand && !p.folded && p.hand && p.hand.length > 0) {
+      const allCards = [...p.hand, ...(state.communityCards || [])];
+      hd.textContent = evaluateHand(allCards).name;
+    } else {
+      hd.textContent = p.folded ? 'Folded' : '—';
+    }
+    const ch = document.createElement('div');
+    ch.className = 'result-row-chips';
+    ch.textContent = p.chips;
+    row.appendChild(nm); row.appendChild(hd); row.appendChild(ch);
+    list.appendChild(row);
+  }
+
+  // Show/hide Next Hand based on whether we're host
+  const isHost = mySlot === 0 || (gameState && gameState.players[0] === null);
+  document.getElementById('btn-next-hand').style.display = mySlot >= 0 ? 'block' : 'none';
+
+  overlay.classList.add('show');
+}
+
+function renderLobby() {
+  if (!gameState) return;
+  const slotsEl = document.getElementById('lby-slots');
+  slotsEl.innerHTML = '';
+  for (let i = 0; i < MAX_PLAYERS; i++) {
+    const p = gameState.players[i];
+    const row = document.createElement('div');
+    row.className = 'slot';
+    const num = document.createElement('span');
+    num.className = 'slot-num';
+    num.textContent = i + 1;
+    const name = document.createElement('span');
+    name.className = p ? 'slot-name' : 'slot-empty';
+    name.textContent = p ? p.name : 'Waiting…';
+    row.appendChild(num);
+    row.appendChild(name);
+    if (p) {
+      const ch = document.createElement('span');
+      ch.className = 'slot-chips';
+      ch.textContent = `${p.chips} chips`;
+      row.appendChild(ch);
+    }
+    if (p && i === mySlot) {
+      const you = document.createElement('span');
+      you.className = 'slot-you';
+      you.textContent = 'you';
+      row.appendChild(you);
+    }
+    slotsEl.appendChild(row);
+  }
+
+  const filled = gameState.players.filter(Boolean).length;
+  const startBtn = document.getElementById('btn-start');
+  const statusEl = document.getElementById('lby-status');
+
+  if (mySlot === 0) {
+    if (filled >= 2) {
+      startBtn.style.display = 'block';
+      startBtn.disabled = false;
+      statusEl.textContent = `${filled} player${filled > 1 ? 's' : ''} ready. You can start!`;
+    } else {
+      startBtn.style.display = 'block';
+      startBtn.disabled = true;
+      statusEl.textContent = 'Need at least 2 players to start.';
+    }
+  } else {
+    startBtn.style.display = 'none';
+    statusEl.textContent = filled >= 2 ? `${filled} players joined. Waiting for host to start…` : `${filled}/2+ players joined.`;
+  }
+}
+
+function renderEndScreen() {
+  if (!gameState) return;
+  const withChips = gameState.players.filter(p => p && p.chips > 0);
+  const winner = withChips[0];
+  document.getElementById('end-title').textContent = winner ? `${winner.name} wins!` : 'Game Over';
+  document.getElementById('end-sub').textContent = winner ? 'Last player with chips' : '';
+
+  const list = document.getElementById('end-list');
+  list.innerHTML = '';
+  const sorted = gameState.players
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => p)
+    .sort((a, b) => (b.p.chips || 0) - (a.p.chips || 0));
+
+  sorted.forEach(({ p, i }, rank) => {
+    const row = document.createElement('div');
+    row.className = 'finish-row';
+    const r = document.createElement('span');
+    r.className = 'finish-rank';
+    r.textContent = `#${rank + 1}`;
+    const nm = document.createElement('span');
+    nm.textContent = p.name + (i === mySlot ? ' (you)' : '') + ' — ' + p.chips + ' chips';
+    row.appendChild(r); row.appendChild(nm);
+    list.appendChild(row);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACTIONS
+   ═══════════════════════════════════════════════════════ */
+async function doAction(action, amount) {
+  if (isSaving || mySlot < 0) return;
+  isSaving = true;
+  showingRaise = false;
+  document.getElementById('raise-row').style.display = 'none';
+
+  try {
+    // Optimistic: fetch fresh state, apply, save
+    const fresh = await fetchGame(null);
+    if (!fresh || fresh === 'notfound') { showToast('Could not load game state'); return; }
+    gameFileSHA = fresh.sha;
+    gameEtag = fresh.etag;
+
+    let state = JSON.parse(JSON.stringify(fresh.state));
+    if (state.currentTurn !== mySlot) { showToast('Not your turn!'); applyGameState(fresh.state); return; }
+
+    state = applyAction(state, mySlot, action, amount);
+    const newSha = await saveGame(state, gameFileSHA);
+    gameFileSHA = newSha;
+    gameEtag = null;
+    gameState = state;
+    applyGameState(state);
+  } catch (err) {
+    if (err.message === 'conflict') showToast('Conflict — refreshing…');
+    else showToast('Error: ' + err.message);
+    console.error(err);
+  } finally {
+    isSaving = false;
+  }
+}
+
+async function doNextHand() {
+  if (isSaving || mySlot < 0) return;
+  document.getElementById('result-overlay').classList.remove('show');
+  isSaving = true;
+
+  try {
+    const fresh = await fetchGame(null);
+    if (!fresh || fresh === 'notfound') { showToast('Could not load state'); return; }
+    gameFileSHA = fresh.sha;
+
+    let state = JSON.parse(JSON.stringify(fresh.state));
+    // Only let a player trigger next hand (any player can)
+    state = startNewHand(state);
+    const newSha = await saveGame(state, gameFileSHA);
+    gameFileSHA = newSha;
+    gameEtag = null;
+    gameState = state;
+    applyGameState(state);
+  } catch (err) {
+    showToast('Failed to start next hand');
+    console.error(err);
+  } finally {
+    isSaving = false;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   JOIN / LOBBY
+   ═══════════════════════════════════════════════════════ */
+async function onJoin() {
+  const name = document.getElementById('inp-name').value.trim();
+  if (!name) { showJoinError('Enter your name first.'); return; }
+
+  showJoinError('');
+  document.getElementById('btn-join').disabled = true;
+
+  try {
+    let result = await fetchGame(null);
+
+    if (result === 'notfound') {
+      // Create fresh table
+      const state = freshTableState();
+      state.players[0] = { name, chips: STARTING_CHIPS, bet: 0, hand: [], folded: false, allIn: false, inHand: false, lastAction: '', joinedAt: new Date().toISOString() };
+      const sha = await createGameFile(state);
+      myName = name; mySlot = 0;
+      gameFileSHA = sha; gameEtag = null; gameState = state;
+      showScreen('lobby'); renderLobby(); startPolling();
+      return;
+    }
+
+    let { state, sha } = result;
+    gameFileSHA = sha;
+
+    // Check if rejoining
+    const existing = state.players.findIndex(p => p && p.name === name);
+    if (existing >= 0) {
+      myName = name; mySlot = existing;
+      gameEtag = null; gameState = state;
+      if (state.status === 'waiting') { showScreen('lobby'); renderLobby(); }
+      else { showScreen('game'); renderGame(); }
+      startPolling();
+      return;
+    }
+
+    if (state.status !== 'waiting') { showJoinError('A game is already in progress. Wait for the next one.'); return; }
+
+    const slot = state.players.findIndex(p => p === null);
+    if (slot === -1) { showJoinError('Table is full (6/6 players).'); return; }
+
+    state.players[slot] = { name, chips: STARTING_CHIPS, bet: 0, hand: [], folded: false, allIn: false, inHand: false, lastAction: '', joinedAt: new Date().toISOString() };
+    state.updatedAt = new Date().toISOString();
+
+    try {
+      sha = await saveGame(state, sha);
+    } catch (err) {
+      if (err.message === 'conflict') {
+        const retry = await fetchGame(null);
+        if (!retry || retry === 'notfound') throw new Error('Table disappeared');
+        state = retry.state; sha = retry.sha;
+        const slot2 = state.players.findIndex(p => p === null);
+        if (slot2 === -1) { showJoinError('Table filled up.'); return; }
+        state.players[slot2] = { name, chips: STARTING_CHIPS, bet: 0, hand: [], folded: false, allIn: false, inHand: false, lastAction: '', joinedAt: new Date().toISOString() };
+        state.updatedAt = new Date().toISOString();
+        sha = await saveGame(state, retry.sha);
+        mySlot = slot2;
+      } else throw err;
+    }
+
+    if (mySlot < 0) mySlot = slot;
+    myName = name;
+    gameFileSHA = sha; gameEtag = null; gameState = state;
+    showScreen('lobby'); renderLobby(); startPolling();
+  } catch (e) {
+    showJoinError('Failed to join: ' + e.message);
+    console.error(e);
+  } finally {
+    document.getElementById('btn-join').disabled = false;
+  }
+}
+
+async function onStartGame() {
+  if (mySlot !== 0) return;
+  document.getElementById('btn-start').disabled = true;
+  try {
+    const fresh = await fetchGame(null);
+    if (!fresh || fresh === 'notfound') throw new Error('not found');
+    gameFileSHA = fresh.sha;
+    let state = JSON.parse(JSON.stringify(fresh.state));
+    const filled = state.players.filter(Boolean).length;
+    if (filled < 2) { showToast('Need at least 2 players.'); document.getElementById('btn-start').disabled = false; return; }
+    state = startNewHand(state);
+    const sha = await saveGame(state, gameFileSHA);
+    gameFileSHA = sha; gameEtag = null; gameState = state;
+    showScreen('game'); renderGame();
+  } catch (e) {
+    document.getElementById('btn-start').disabled = false;
+    showToast('Failed to start: ' + e.message);
+    console.error(e);
+  }
+}
+
+async function onLeave() {
+  if (mySlot < 0) { showScreen('join'); return; }
+  stopPolling();
+  try {
+    const fresh = await fetchGame(null);
+    if (fresh && fresh !== 'notfound') {
+      let state = JSON.parse(JSON.stringify(fresh.state));
+      if (state.status === 'waiting' && state.players[mySlot]) {
+        state.players[mySlot] = null;
+        // Shift host if needed
+        if (mySlot === 0) {
+          const nextHost = state.players.findIndex((p, i) => i > 0 && p);
+          if (nextHost >= 0) {
+            state.players[0] = state.players[nextHost];
+            state.players[nextHost] = null;
+          }
+        }
+        state.updatedAt = new Date().toISOString();
+        await saveGame(state, fresh.sha).catch(() => {});
+      }
+    }
+  } catch (e) { /* silent */ }
+  mySlot = -1; myName = '';
+  gameState = null; gameFileSHA = null; gameEtag = null;
+  showScreen('join');
+}
+
+async function onCashOut() {
+  document.getElementById('result-overlay').classList.remove('show');
+  stopPolling();
+  // Remove player from state
+  if (mySlot >= 0) {
+    try {
+      const fresh = await fetchGame(null);
+      if (fresh && fresh !== 'notfound') {
+        let state = JSON.parse(JSON.stringify(fresh.state));
+        if (state.players[mySlot]) {
+          state.players[mySlot] = null;
+          state.updatedAt = new Date().toISOString();
+          await saveGame(state, fresh.sha).catch(() => {});
+        }
+      }
+    } catch (e) { /* silent */ }
+  }
+  mySlot = -1; myName = '';
+  gameState = null; gameFileSHA = null; gameEtag = null;
+  showScreen('join');
+}
+
+/* ═══════════════════════════════════════════════════════
+   UI HELPERS
+   ═══════════════════════════════════════════════════════ */
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen-${name}`).classList.add('active');
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function showJoinError(msg) {
+  document.getElementById('join-error').textContent = msg;
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════ */
+function init() {
+  document.getElementById('btn-join').addEventListener('click', onJoin);
+  document.getElementById('btn-start').addEventListener('click', onStartGame);
+  document.getElementById('btn-leave').addEventListener('click', onLeave);
+  document.getElementById('btn-next-hand').addEventListener('click', doNextHand);
+  document.getElementById('btn-cash-out').addEventListener('click', onCashOut);
+  document.getElementById('btn-home').addEventListener('click', () => { stopPolling(); location.href = '/poker'; });
+  document.getElementById('btn-exit-game').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await onCashOut();
+  });
+
+  document.getElementById('inp-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') onJoin();
+  });
+
+  window.addEventListener('beforeunload', () => stopPolling());
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
