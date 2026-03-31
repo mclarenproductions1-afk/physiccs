@@ -3,8 +3,8 @@
   "players": [
     {
       "name": "67",
-      "chips": 1000,
-      "bet": 0,
+      "chips": 980,
+      "bet": 20,
       "hand": [
         "7s",
         "2c"
@@ -12,7 +12,7 @@
       "folded": false,
       "allIn": false,
       "inHand": true,
-      "lastAction": "",
+      "lastAction": "Call",
       "joinedAt": "2026-03-31T23:50:39.289Z"
     },
     {
@@ -27,8 +27,7 @@
       "allIn": false,
       "inHand": true,
       "lastAction": "",
-      "joinedAt": "2026-03-31T23:50:48.528Z",
-      "isDealer": true
+      "joinedAt": "2026-03-31T23:50:48.528Z"
     },
     {
       "name": "Ryan",
@@ -42,8 +41,7 @@
       "allIn": false,
       "inHand": true,
       "lastAction": "SB",
-      "joinedAt": "2026-03-31T23:50:42.538Z",
-      "isSB": true
+      "joinedAt": "2026-03-31T23:50:42.538Z"
     },
     {
       "name": "Dih Lord",
@@ -57,8 +55,7 @@
       "allIn": false,
       "inHand": true,
       "lastAction": "BB",
-      "joinedAt": "2026-03-31T23:50:43.322Z",
-      "isBB": true
+      "joinedAt": "2026-03-31T23:50:43.322Z"
     },
     null,
     null
@@ -114,14 +111,20 @@
     "Kh"
   ],
   "communityCards": [],
-  "pot": 30,
+  "pot": 50,
   "sidePots": [],
   "currentBet": 20,
   "minRaise": 20,
-  "currentTurn": 0,
-  "turnStartedAt": "2026-03-31T23:51:14.355Z",
+  "currentTurn": 1,
+  "turnStartedAt": "2026-03-31T23:51:36.186Z",
   "lastAggressor": 3,
   "roundStartPlayer": 3,
-  "actions": [],
-  "updatedAt": "2026-03-31T23:51:14.355Z"
+  "actions": [
+    {
+      "slot": 0,
+      "action": "call",
+      "amount": 20
+    }
+  ],
+  "updatedAt": "2026-03-31T23:51:36.186Z"
 }
