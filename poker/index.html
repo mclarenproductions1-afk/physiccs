@@ -385,7 +385,7 @@ input[type="text"]:focus { border-color: var(--text); }
   <div class="center-wrap">
     <div class="card">
       <h1>Poker</h1>
-      <p class="sub">Texas Hold'em — up to 6 players. One shared table, no room codes needed.</p>
+      <p class="sub">Texas Hold'em — up to 6 players. One shared table, no room codes. Join mid-game and you'll be seated next hand.</p>
       <input id="inp-name" type="text" placeholder="Your name" maxlength="20" autocomplete="off" />
       <button id="btn-join" class="btn" style="width:100%">Join Table</button>
       <div id="join-error" class="error-msg"></div>
@@ -446,6 +446,9 @@ input[type="text"]:focus { border-color: var(--text); }
     <button class="raise-preset" onclick="setRaisePreset(999)">All-in</button>
   </div>
 
+  <!-- AFK countdown warning (shown when it's your turn and time is low) -->
+  <div id="turn-countdown-warn" style="display:none;font-size:0.75rem;color:#e5a23e;font-weight:600;text-align:center;padding:4px 16px;"></div>
+
   <!-- Action buttons -->
   <div id="action-row" class="action-row"></div>
   <div id="waiting-msg" class="waiting-msg"></div>
@@ -498,15 +501,17 @@ const MAX_PLAYERS = 6;
 /* ═══════════════════════════════════════════════════════
    CLIENT STATE
    ═══════════════════════════════════════════════════════ */
-let myName      = "";
-let mySlot      = -1;
-let gameFileSHA = null;
-let gameEtag    = null;
-let gameState   = null;
-let pollTimer   = null;
-let isSaving    = false;
-let toastTimer  = null;
+let myName       = "";
+let mySlot       = -1;
+let gameFileSHA  = null;
+let gameEtag     = null;
+let gameState    = null;
+let pollTimer    = null;
+let isSaving     = false;
+let toastTimer   = null;
 let showingRaise = false;
+let countdownTimer = null;   // interval that ticks the turn countdown UI
+const AFK_SECONDS  = 60;    // seconds before auto-fold
 
 /* ═══════════════════════════════════════════════════════
    CARD UTILS
@@ -684,6 +689,7 @@ function freshTableState() {
   return {
     status: "waiting",
     players: new Array(MAX_PLAYERS).fill(null),
+    queue: [],               // players waiting to join next hand
     handNum: 0,
     dealer: 0,
     phase: "waiting",        // waiting|preflop|flop|turn|river|showdown
@@ -694,6 +700,7 @@ function freshTableState() {
     currentBet: 0,
     minRaise: BIG_BLIND,
     currentTurn: -1,
+    turnStartedAt: null,     // ISO timestamp when current turn began (for AFK detection)
     lastAggressor: -1,
     roundStartPlayer: -1,
     actions: [],             // { slot, action, amount } log for current round
@@ -730,6 +737,22 @@ function countCanAct(state) {
    DEAL / BETTING LOGIC
    ═══════════════════════════════════════════════════════ */
 function startNewHand(state) {
+  if (!state.queue) state.queue = [];
+
+  // Remove broke players and seat queued players into their empty slots
+  for (let i = 0; i < MAX_PLAYERS; i++) {
+    const p = state.players[i];
+    if (p && p.chips <= 0) {
+      state.players[i] = null;
+    }
+  }
+  // Fill empty seats from queue
+  for (let i = 0; i < MAX_PLAYERS && state.queue.length > 0; i++) {
+    if (!state.players[i]) {
+      state.players[i] = state.queue.shift();
+    }
+  }
+
   const active = state.players.map((p, i) => [p, i]).filter(([p]) => p && p.chips > 0);
   if (active.length < 2) return state; // can't start
 
@@ -739,11 +762,6 @@ function startNewHand(state) {
   for (let i = 0; i < MAX_PLAYERS; i++) {
     const p = state.players[i];
     if (!p) continue;
-    if (p.chips <= 0) {
-      state.players[i] = null; // remove broke players
-      if (i === mySlot) mySlot = -1;
-      continue;
-    }
     p.hand = [];
     p.bet = 0;
     p.folded = false;
@@ -804,6 +822,7 @@ function startNewHand(state) {
   // UTG starts
   const utgSlot = nextFrom(bbSlot);
   state.currentTurn = utgSlot;
+  state.turnStartedAt = new Date().toISOString();
   state.lastAggressor = bbSlot;
   state.roundStartPlayer = bbSlot; // betting ends when action returns to BB (if no raise)
 
@@ -876,6 +895,7 @@ function applyAction(state, slot, action, amount) {
     return advancePhase(state);
   } else {
     state.currentTurn = nextSlot === -1 ? advancePhaseIfNeeded(state) : nextSlot;
+    state.turnStartedAt = new Date().toISOString();
   }
 
   state.updatedAt = new Date().toISOString();
@@ -928,6 +948,7 @@ function advancePhase(state) {
 
   state.lastAggressor = nextFrom(state.dealer);
   state.currentTurn = nextFrom(state.dealer);
+  state.turnStartedAt = new Date().toISOString();
   state.updatedAt = new Date().toISOString();
   return state;
 }
@@ -985,17 +1006,70 @@ function resolveHand(state, forcedWinner) {
 /* ═══════════════════════════════════════════════════════
    POLLING
    ═══════════════════════════════════════════════════════ */
+const AFK_MS = AFK_SECONDS * 1000;
+
 function startPolling() {
   stopPolling();
   pollTimer = setInterval(pollGame, 2500);
+  countdownTimer = setInterval(tickCountdown, 1000);
 }
 
 function stopPolling() {
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+}
+
+function afkSecondsLeft(state) {
+  if (!state || !state.turnStartedAt || state.currentTurn < 0) return AFK_SECONDS;
+  return Math.max(0, AFK_SECONDS - Math.floor((Date.now() - new Date(state.turnStartedAt)) / 1000));
+}
+
+function tickCountdown() {
+  if (!gameState || gameState.status !== 'active' || gameState.currentTurn < 0) return;
+  const secs = afkSecondsLeft(gameState);
+  // Update countdown label on the active player chip (if rendered)
+  const el = document.getElementById('afk-countdown');
+  if (el) {
+    el.textContent = secs <= 10 ? `${secs}s` : secs <= 20 ? `${secs}s` : '';
+    el.style.color = secs <= 10 ? '#e53e3e' : '#e5a23e';
+  }
+  // If it's my turn and I'm about to time out, warn me
+  if (gameState.currentTurn === mySlot && secs <= 10 && secs > 0) {
+    const wmsg = document.getElementById('waiting-msg');
+    if (wmsg && wmsg.textContent === '') wmsg.textContent = ''; // action row is shown, handled below
+    updateCountdownWarning(secs);
+  }
+}
+
+function updateCountdownWarning(secs) {
+  const el = document.getElementById('turn-countdown-warn');
+  if (!el) return;
+  if (secs > 0) {
+    el.textContent = `⚠ Act within ${secs}s or you'll be auto-folded`;
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
 }
 
 async function pollGame() {
   if (isSaving) return;
+
+  // AFK check: if current turn player has been inactive > AFK_MS, auto-fold them
+  if (gameState && gameState.status === 'active' && gameState.currentTurn >= 0 && gameState.turnStartedAt) {
+    const elapsed = Date.now() - new Date(gameState.turnStartedAt);
+    if (elapsed > AFK_MS) {
+      // Only attempt the kick if we're a seated player (not a spectator)
+      // and we're the next-to-act player (lowest active slot after current), to reduce races
+      const afkSlot = gameState.currentTurn;
+      const nextSlot = nextActiveSlot(gameState, afkSlot);
+      if (mySlot >= 0 && mySlot === nextSlot) {
+        await kickAfkPlayer(afkSlot);
+        return;
+      }
+    }
+  }
+
   try {
     const result = await fetchGame(gameEtag);
     if (!result || result === "notfound") return;
@@ -1005,13 +1079,59 @@ async function pollGame() {
   } catch (e) { /* silent */ }
 }
 
+async function kickAfkPlayer(afkSlot) {
+  if (isSaving) return;
+  isSaving = true;
+  try {
+    const fresh = await fetchGame(null);
+    if (!fresh || fresh === 'notfound') return;
+    gameFileSHA = fresh.sha;
+    gameEtag = fresh.etag;
+    const state = JSON.parse(JSON.stringify(fresh.state));
+
+    // Re-check: still that player's turn and still over the limit?
+    if (state.currentTurn !== afkSlot || !state.turnStartedAt) { applyGameState(fresh.state); return; }
+    if (Date.now() - new Date(state.turnStartedAt) <= AFK_MS) { applyGameState(fresh.state); return; }
+
+    const afkPlayer = state.players[afkSlot];
+    if (!afkPlayer) { applyGameState(fresh.state); return; }
+
+    showToast(`${afkPlayer.name} was removed for inactivity`);
+    // Remove them from the game entirely, then fold their hand
+    afkPlayer.folded = true;
+    afkPlayer.lastAction = 'AFK';
+    const updated = applyAction(state, afkSlot, 'fold', 0);
+    // Also remove them so they don't get dealt in next hand
+    updated.players[afkSlot] = null;
+
+    const newSha = await saveGame(updated, gameFileSHA);
+    gameFileSHA = newSha; gameEtag = null; gameState = updated;
+    applyGameState(updated);
+  } catch (e) {
+    if (e.message !== 'conflict') console.error('AFK kick failed:', e);
+  } finally {
+    isSaving = false;
+  }
+}
+
+function myQueueIndex(state) {
+  if (!state.queue) return -1;
+  return state.queue.findIndex(q => q.name === myName);
+}
+
 function applyGameState(newState) {
   const prev = gameState;
   gameState = newState;
 
-  if (mySlot >= 0 && newState.players[mySlot] === null) {
-    // We got kicked (e.g. out of chips and hand ended)
+  // Check if we got kicked (AFK or out of chips) — but not if we're queued
+  if (mySlot >= 0 && newState.players[mySlot] === null && myQueueIndex(newState) < 0) {
     mySlot = -1;
+  }
+
+  // If we were queued and now got seated, update mySlot
+  if (mySlot < 0 && myName) {
+    const seated = newState.players.findIndex(p => p && p.name === myName);
+    if (seated >= 0) mySlot = seated;
   }
 
   if (newState.status === 'waiting') {
@@ -1064,7 +1184,8 @@ function renderPlayersRow() {
     if (!p) continue;
     const chip = document.createElement('div');
     chip.className = 'player-chip';
-    if (i === gameState.currentTurn) chip.classList.add('active-turn');
+    const isActive = i === gameState.currentTurn;
+    if (isActive) chip.classList.add('active-turn');
     if (p.folded) chip.classList.add('folded');
     if (i === mySlot) chip.classList.add('you');
     if (gameState.lastWinners && gameState.lastWinners.find(w => w.slot === i)) chip.classList.add('winner');
@@ -1094,11 +1215,40 @@ function renderPlayersRow() {
       chip.appendChild(act);
     }
 
+    // AFK countdown label (only for the active player)
+    if (isActive && gameState.status === 'active') {
+      const cd = document.createElement('div');
+      cd.id = 'afk-countdown';
+      cd.style.cssText = 'font-size:0.65rem;font-weight:700;margin-top:2px;';
+      const secs = afkSecondsLeft(gameState);
+      cd.textContent = secs <= 20 ? `${secs}s` : '';
+      cd.style.color = secs <= 10 ? '#e53e3e' : '#e5a23e';
+      chip.appendChild(cd);
+    }
+
     // Badges
     if (p.isDealer) { const b = document.createElement('div'); b.className = 'player-status-badge dealer'; b.textContent = 'D'; chip.appendChild(b); }
     else if (p.isSB) { const b = document.createElement('div'); b.className = 'player-status-badge sb'; b.textContent = 'SB'; chip.appendChild(b); }
     else if (p.isBB) { const b = document.createElement('div'); b.className = 'player-status-badge bb'; b.textContent = 'BB'; chip.appendChild(b); }
 
+    row.appendChild(chip);
+  }
+
+  // Show queued players
+  const queue = gameState.queue || [];
+  for (const q of queue) {
+    const chip = document.createElement('div');
+    chip.className = 'player-chip';
+    chip.style.opacity = '0.5';
+    chip.style.borderStyle = 'dashed';
+    const name = document.createElement('div');
+    name.className = 'player-name';
+    name.textContent = q.name + (q.name === myName ? ' (you)' : '');
+    const lbl = document.createElement('div');
+    lbl.className = 'player-action-label';
+    lbl.textContent = 'next hand';
+    chip.appendChild(name);
+    chip.appendChild(lbl);
     row.appendChild(chip);
   }
 }
@@ -1146,18 +1296,32 @@ function renderActions() {
   actionRow.innerHTML = '';
   waitingMsg.textContent = '';
 
-  if (mySlot < 0) { waitingMsg.textContent = 'You are spectating.'; return; }
+  if (mySlot < 0) {
+    const qi = myQueueIndex(gameState);
+    waitingMsg.textContent = qi >= 0 ? 'You\'ll be seated at the start of the next hand.' : 'You are spectating.';
+    return;
+  }
 
   const me = gameState.players[mySlot];
-  if (!me) { waitingMsg.textContent = 'Waiting for next hand…'; return; }
+  if (!me) {
+    const qi = myQueueIndex(gameState);
+    waitingMsg.textContent = qi >= 0 ? 'You\'ll be seated at the start of the next hand.' : 'Waiting for next hand…';
+    return;
+  }
 
   if (gameState.status === 'showdown') { return; }
 
   if (gameState.currentTurn !== mySlot) {
     const cur = gameState.currentTurn >= 0 ? gameState.players[gameState.currentTurn] : null;
+    const secs = afkSecondsLeft(gameState);
     waitingMsg.textContent = cur ? `Waiting for ${cur.name}…` : 'Waiting…';
+    document.getElementById('turn-countdown-warn').style.display = 'none';
     return;
   }
+
+  // It's my turn — show countdown warning if low on time
+  const secsMine = afkSecondsLeft(gameState);
+  updateCountdownWarning(secsMine);
 
   if (me.folded || me.allIn) { waitingMsg.textContent = me.allIn ? 'You are all-in.' : 'You folded.'; return; }
 
@@ -1433,7 +1597,9 @@ async function onJoin() {
     let { state, sha } = result;
     gameFileSHA = sha;
 
-    // Check if rejoining
+    if (!state.queue) state.queue = [];
+
+    // Check if rejoining as seated player
     const existing = state.players.findIndex(p => p && p.name === name);
     if (existing >= 0) {
       myName = name; mySlot = existing;
@@ -1444,34 +1610,71 @@ async function onJoin() {
       return;
     }
 
-    if (state.status !== 'waiting') { showJoinError('A game is already in progress. Wait for the next one.'); return; }
-
-    const slot = state.players.findIndex(p => p === null);
-    if (slot === -1) { showJoinError('Table is full (6/6 players).'); return; }
-
-    state.players[slot] = { name, chips: STARTING_CHIPS, bet: 0, hand: [], folded: false, allIn: false, inHand: false, lastAction: '', joinedAt: new Date().toISOString() };
-    state.updatedAt = new Date().toISOString();
-
-    try {
-      sha = await saveGame(state, sha);
-    } catch (err) {
-      if (err.message === 'conflict') {
-        const retry = await fetchGame(null);
-        if (!retry || retry === 'notfound') throw new Error('Table disappeared');
-        state = retry.state; sha = retry.sha;
-        const slot2 = state.players.findIndex(p => p === null);
-        if (slot2 === -1) { showJoinError('Table filled up.'); return; }
-        state.players[slot2] = { name, chips: STARTING_CHIPS, bet: 0, hand: [], folded: false, allIn: false, inHand: false, lastAction: '', joinedAt: new Date().toISOString() };
-        state.updatedAt = new Date().toISOString();
-        sha = await saveGame(state, retry.sha);
-        mySlot = slot2;
-      } else throw err;
+    // Check if already in queue
+    const inQueue = state.queue.findIndex(q => q.name === name);
+    if (inQueue >= 0) {
+      myName = name; mySlot = -1;
+      gameEtag = null; gameState = state;
+      showScreen('game'); renderGame();
+      startPolling();
+      return;
     }
 
-    if (mySlot < 0) mySlot = slot;
-    myName = name;
-    gameFileSHA = sha; gameEtag = null; gameState = state;
-    showScreen('lobby'); renderLobby(); startPolling();
+    const newPlayer = { name, chips: STARTING_CHIPS, bet: 0, hand: [], folded: false, allIn: false, inHand: false, lastAction: '', joinedAt: new Date().toISOString() };
+
+    if (state.status === 'waiting') {
+      // Seat directly
+      const slot = state.players.findIndex(p => p === null);
+      if (slot === -1) { showJoinError('Table is full (6/6 players).'); return; }
+      state.players[slot] = newPlayer;
+      state.updatedAt = new Date().toISOString();
+      try {
+        sha = await saveGame(state, sha);
+      } catch (err) {
+        if (err.message === 'conflict') {
+          const retry = await fetchGame(null);
+          if (!retry || retry === 'notfound') throw new Error('Table disappeared');
+          state = retry.state; sha = retry.sha;
+          if (!state.queue) state.queue = [];
+          const slot2 = state.players.findIndex(p => p === null);
+          if (slot2 === -1) { showJoinError('Table filled up.'); return; }
+          state.players[slot2] = newPlayer;
+          state.updatedAt = new Date().toISOString();
+          sha = await saveGame(state, retry.sha);
+          mySlot = slot2;
+        } else throw err;
+      }
+      if (mySlot < 0) mySlot = state.players.indexOf(newPlayer);
+      myName = name;
+      gameFileSHA = sha; gameEtag = null; gameState = state;
+      showScreen('lobby'); renderLobby(); startPolling();
+    } else {
+      // Game in progress — add to queue for next hand
+      // Check queue isn't also full (max 6 total seated + queued)
+      const totalSeated = state.players.filter(Boolean).length;
+      if (totalSeated + state.queue.length >= MAX_PLAYERS) { showJoinError('Table is full. Try again later.'); return; }
+      state.queue.push(newPlayer);
+      state.updatedAt = new Date().toISOString();
+      try {
+        sha = await saveGame(state, sha);
+      } catch (err) {
+        if (err.message === 'conflict') {
+          const retry = await fetchGame(null);
+          if (!retry || retry === 'notfound') throw new Error('Table disappeared');
+          state = retry.state; sha = retry.sha;
+          if (!state.queue) state.queue = [];
+          const totalSeated2 = state.players.filter(Boolean).length;
+          if (totalSeated2 + state.queue.length >= MAX_PLAYERS) { showJoinError('Table filled up.'); return; }
+          state.queue.push(newPlayer);
+          state.updatedAt = new Date().toISOString();
+          sha = await saveGame(state, retry.sha);
+        } else throw err;
+      }
+      myName = name; mySlot = -1;
+      gameFileSHA = sha; gameEtag = null; gameState = state;
+      showToast('Joined queue — you\'ll be seated next hand');
+      showScreen('game'); renderGame(); startPolling();
+    }
   } catch (e) {
     showJoinError('Failed to join: ' + e.message);
     console.error(e);
