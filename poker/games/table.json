@@ -3,8 +3,8 @@
   "players": [
     {
       "name": "67",
-      "chips": 970,
-      "bet": 10,
+      "chips": 880,
+      "bet": 100,
       "hand": [
         "10d",
         "7h"
@@ -12,7 +12,7 @@
       "folded": false,
       "allIn": false,
       "inHand": true,
-      "lastAction": "SB",
+      "lastAction": "Call",
       "joinedAt": "2026-03-31T23:48:52.483Z"
     },
     {
@@ -100,12 +100,12 @@
     "9s"
   ],
   "communityCards": [],
-  "pot": 130,
+  "pot": 220,
   "sidePots": [],
   "currentBet": 100,
   "minRaise": 80,
-  "currentTurn": 0,
-  "turnStartedAt": "2026-03-31T23:49:25.271Z",
+  "currentTurn": 1,
+  "turnStartedAt": "2026-03-31T23:49:31.075Z",
   "lastAggressor": 2,
   "roundStartPlayer": 1,
   "actions": [
@@ -113,7 +113,12 @@
       "slot": 2,
       "action": "raise",
       "amount": 100
+    },
+    {
+      "slot": 0,
+      "action": "call",
+      "amount": 100
     }
   ],
-  "updatedAt": "2026-03-31T23:49:25.271Z"
+  "updatedAt": "2026-03-31T23:49:31.075Z"
 }
