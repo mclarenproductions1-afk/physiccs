@@ -26,7 +26,7 @@
       "folded": false,
       "allIn": false,
       "inHand": true,
-      "lastAction": "Check",
+      "lastAction": "",
       "joinedAt": "2026-03-31T23:50:48.528Z"
     },
     null,
@@ -37,7 +37,7 @@
   "queue": [],
   "handNum": 5,
   "dealer": 0,
-  "phase": "flop",
+  "phase": "turn",
   "deck": [
     "2c",
     "10h",
@@ -82,30 +82,24 @@
     "9c",
     "As",
     "9s",
-    "7d",
-    "10c"
+    "7d"
   ],
   "communityCards": [
     "6c",
     "8d",
-    "5s"
+    "5s",
+    "10c"
   ],
   "pot": 40,
   "sidePots": [],
   "currentBet": 0,
   "minRaise": 20,
-  "currentTurn": 0,
-  "turnStartedAt": "2026-03-31T23:57:03.492Z",
+  "currentTurn": 1,
+  "turnStartedAt": "2026-03-31T23:57:09.637Z",
   "lastAggressor": 1,
   "roundStartPlayer": 0,
-  "actions": [
-    {
-      "slot": 1,
-      "action": "check",
-      "amount": 0
-    }
-  ],
-  "updatedAt": "2026-03-31T23:57:03.492Z",
+  "actions": [],
+  "updatedAt": "2026-03-31T23:57:09.637Z",
   "lastWinners": [
     {
       "slot": 0,
