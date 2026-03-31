@@ -1,5 +1,5 @@
 {
-  "status": "active",
+  "status": "showdown",
   "players": [
     {
       "name": "67",
@@ -9,7 +9,7 @@
         "7s",
         "2c"
       ],
-      "folded": false,
+      "folded": true,
       "allIn": false,
       "inHand": true,
       "lastAction": "",
@@ -31,8 +31,8 @@
     },
     {
       "name": "Ryan",
-      "chips": 0,
-      "bet": 880,
+      "chips": 2140,
+      "bet": 0,
       "hand": [
         "Jc",
         "2h"
@@ -40,13 +40,13 @@
       "folded": false,
       "allIn": true,
       "inHand": true,
-      "lastAction": "All-in",
+      "lastAction": "Wins!",
       "joinedAt": "2026-03-31T23:50:42.538Z"
     },
     {
       "name": "Dih Lord",
       "chips": 0,
-      "bet": 880,
+      "bet": 0,
       "hand": [
         "Qs",
         "Jd"
@@ -54,7 +54,7 @@
       "folded": false,
       "allIn": true,
       "inHand": true,
-      "lastAction": "All-in",
+      "lastAction": "",
       "joinedAt": "2026-03-31T23:50:43.322Z"
     },
     null,
@@ -63,7 +63,7 @@
   "queue": [],
   "handNum": 1,
   "dealer": 1,
-  "phase": "turn",
+  "phase": "showdown",
   "deck": [
     "Js",
     "3s",
@@ -103,34 +103,30 @@
     "8c",
     "9d",
     "6h",
-    "6c",
-    "4h"
+    "6c"
   ],
   "communityCards": [
     "Kh",
     "Jh",
     "7h",
-    "As"
+    "As",
+    "4h"
   ],
-  "pot": 2140,
+  "pot": 0,
   "sidePots": [],
-  "currentBet": 880,
-  "minRaise": 0,
-  "currentTurn": 0,
+  "currentBet": 0,
+  "minRaise": 20,
+  "currentTurn": -1,
   "turnStartedAt": "2026-03-31T23:52:56.404Z",
   "lastAggressor": 3,
   "roundStartPlayer": 3,
-  "actions": [
+  "actions": [],
+  "updatedAt": "2026-03-31T23:53:04.905Z",
+  "lastWinners": [
     {
       "slot": 2,
-      "action": "raise",
-      "amount": 880
-    },
-    {
-      "slot": 3,
-      "action": "raise",
-      "amount": 880
+      "hand": "Flush",
+      "amount": 2140
     }
-  ],
-  "updatedAt": "2026-03-31T23:52:56.404Z"
+  ]
 }
