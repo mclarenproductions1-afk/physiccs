@@ -3,8 +3,8 @@
   "players": [
     {
       "name": "67",
-      "chips": 378,
-      "bet": 0,
+      "chips": 311,
+      "bet": 67,
       "hand": [
         "7d",
         "6d"
@@ -12,7 +12,7 @@
       "folded": false,
       "allIn": false,
       "inHand": true,
-      "lastAction": "",
+      "lastAction": "Raise 67",
       "joinedAt": "2026-03-31T23:50:39.289Z"
     },
     {
@@ -90,16 +90,22 @@
     "8s",
     "Js"
   ],
-  "pot": 40,
+  "pot": 107,
   "sidePots": [],
-  "currentBet": 0,
-  "minRaise": 20,
-  "currentTurn": 0,
-  "turnStartedAt": "2026-03-31T23:55:23.173Z",
+  "currentBet": 67,
+  "minRaise": 67,
+  "currentTurn": 1,
+  "turnStartedAt": "2026-03-31T23:55:38.822Z",
   "lastAggressor": 0,
   "roundStartPlayer": 1,
-  "actions": [],
-  "updatedAt": "2026-03-31T23:55:23.173Z",
+  "actions": [
+    {
+      "slot": 0,
+      "action": "raise",
+      "amount": 67
+    }
+  ],
+  "updatedAt": "2026-03-31T23:55:38.822Z",
   "lastWinners": [
     {
       "slot": 1,
