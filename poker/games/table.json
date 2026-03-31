@@ -3,20 +3,7 @@
   "players": [
     null,
     null,
-    {
-      "name": "roy",
-      "chips": 2980,
-      "bet": 0,
-      "hand": [
-        "Jh",
-        "8s"
-      ],
-      "folded": true,
-      "allIn": false,
-      "inHand": true,
-      "lastAction": "Fold",
-      "joinedAt": "2026-03-31T01:36:01.776Z"
-    },
+    null,
     null,
     null,
     null
@@ -95,7 +82,7 @@
       "amount": 0
     }
   ],
-  "updatedAt": "2026-03-31T01:39:46.872Z",
+  "updatedAt": "2026-03-31T01:40:21.060Z",
   "lastWinners": [
     {
       "slot": 1,
