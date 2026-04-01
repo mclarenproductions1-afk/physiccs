@@ -48,5 +48,15 @@
     "notes": "",
     "completed": false,
     "createdAt": "2026-04-01"
+  },
+  {
+    "id": "dba8e035-4981-4937-ac3e-ef82c883832f",
+    "title": "Creative Writing and Reflection Task",
+    "subject": "Extension English",
+    "type": "assignment",
+    "dueDate": "2026-04-30",
+    "notes": "",
+    "completed": false,
+    "createdAt": "2026-04-01"
   }
 ]
