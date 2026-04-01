@@ -28,5 +28,15 @@
     "notes": "A3 Dutch still life interpriation",
     "completed": false,
     "createdAt": "2026-04-01"
+  },
+  {
+    "id": "0db8bd2e-4f91-470a-aa56-10f3c9d22f2f",
+    "title": "Open Book Exam",
+    "subject": "Extension Maths",
+    "type": "assignment",
+    "dueDate": "2026-05-04",
+    "notes": "",
+    "completed": false,
+    "createdAt": "2026-04-01"
   }
 ]
