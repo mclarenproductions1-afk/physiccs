@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat — Study Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #fff;
+    --text: #111;
+    --muted: #888;
+    --border: #e5e5e5;
+    --surface: #fafafa;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 12px; }
+
+  .back {
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .back:hover { color: var(--text); }
+
+  .logo {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ccc;
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  .status-dot.connected { background: #111; }
+
+  .status-text {
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: 4px;
+  }
+
+  .header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .username-display {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .btn-change-name {
+    font-size: 12px;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    font-family: inherit;
+  }
+  .btn-change-name:hover { color: var(--text); }
+
+  /* Name modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal-overlay.hidden { display: none; }
+
+  .modal {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 28px 24px;
+    width: 320px;
+  }
+
+  .modal h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .modal p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .modal input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    margin-bottom: 12px;
+  }
+  .modal input:focus { border-color: var(--text); }
+
+  .modal button {
+    width: 100%;
+    padding: 10px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .modal button:hover { background: #333; }
+
+  /* Messages area */
+  #messages-wrap {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 24px;
+    scroll-behavior: smooth;
+  }
+
+  .day-label {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    margin: 16px 0 8px;
+    position: relative;
+  }
+  .day-label::before, .day-label::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 40px);
+    height: 1px;
+    background: var(--border);
+  }
+  .day-label::before { left: 0; }
+  .day-label::after { right: 0; }
+
+  .msg {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    max-width: 680px;
+  }
+
+  .msg-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #111;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .msg-body { flex: 1; min-width: 0; }
+
+  .msg-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 3px;
+  }
+
+  .msg-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .msg-name.is-me { color: #555; }
+
+  .msg-time {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .msg-text {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text);
+    word-break: break-word;
+  }
+
+  /* Typing indicator */
+  #typing-bar {
+    padding: 4px 24px 6px;
+    min-height: 22px;
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .typing-dots {
+    display: inline-flex;
+    gap: 3px;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+
+  .typing-dots span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--muted);
+    animation: bounce 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* Live typing preview */
+  #live-typing-area {
+    padding: 0 24px 6px;
+    flex-shrink: 0;
+  }
+
+  .live-preview {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    opacity: 0.5;
+    margin-bottom: 6px;
+  }
+
+  .live-preview .msg-avatar {
+    background: #ccc;
+  }
+
+  .live-preview .msg-text {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .live-preview .msg-name {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* Input area */
+  #input-area {
+    padding: 12px 24px 20px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  #msg-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    resize: none;
+    height: 42px;
+    line-height: 1.4;
+  }
+  #msg-input:focus { border-color: var(--text); }
+
+  #send-btn {
+    padding: 10px 18px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    height: 42px;
+  }
+  #send-btn:hover { background: #333; }
+  #send-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  .hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 12px 16px; }
+    #messages-wrap { padding: 12px 16px; }
+    #input-area { padding: 10px 16px 16px; }
+    #typing-bar { padding: 4px 16px 4px; }
+    #live-typing-area { padding: 0 16px 4px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Name modal -->
+<div class="modal-overlay" id="name-modal">
+  <div class="modal">
+    <h2>Join the chat</h2>
+    <p>Pick a display name. You can change it later.</p>
+    <input type="text" id="name-input" placeholder="Your name" maxlength="24" autocomplete="off">
+    <button id="name-btn">Join</button>
+  </div>
+</div>
+
+<header>
+  <div class="header-left">
+    <a class="back" href="/">← Study Hub</a>
+    <span class="logo">Chat</span>
+    <span class="status-dot" id="status-dot"></span>
+    <span class="status-text" id="status-text">connecting…</span>
+  </div>
+  <div class="header-right">
+    <span class="username-display" id="username-display"></span>
+    <button class="btn-change-name" id="btn-change-name">change name</button>
+  </div>
+</header>
+
+<div id="messages-wrap">
+  <div id="messages-list"></div>
+</div>
+
+<div id="live-typing-area"></div>
+
+<div id="typing-bar"></div>
+
+<div id="input-area">
+  <div class="input-row">
+    <input type="text" id="msg-input" placeholder="Message…" maxlength="500" autocomplete="off">
+    <button id="send-btn">Send</button>
+  </div>
+  <div class="hint">Enter to send</div>
+</div>
+
+<script>
+(function() {
+  // ── Config ──────────────────────────────────────────────────────────────────
+  const PEERS = [
+    'https://relay.gun.eco/gun',
+    'https://gun-manhattan.herokuapp.com/gun'
+  ];
+  const ROOM = 'ryanssite-livechat-v3';
+  const MAX_MSGS = 120;
+  const TYPING_EXPIRE_MS = 4000;
+
+  // ── Gun init ─────────────────────────────────────────────────────────────────
+  const gun = Gun(PEERS);
+  const msgsRef   = gun.get(ROOM + '/messages');
+  const typingRef = gun.get(ROOM + '/typing');
+
+  // ── Identity ─────────────────────────────────────────────────────────────────
+  let username = localStorage.getItem('chat-name') || '';
+  let userId   = localStorage.getItem('chat-uid');
+  if (!userId) {
+    userId = 'u' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('chat-uid', userId);
+  }
+
+  function setUsername(name) {
+    username = name.trim().slice(0, 24) || 'Anonymous';
+    localStorage.setItem('chat-name', username);
+    document.getElementById('username-display').textContent = username;
+  }
+
+  // ── Name modal ────────────────────────────────────────────────────────────────
+  const modal     = document.getElementById('name-modal');
+  const nameInput = document.getElementById('name-input');
+  const nameBtn   = document.getElementById('name-btn');
+
+  function showModal() {
+    modal.classList.remove('hidden');
+    nameInput.value = username;
+    setTimeout(() => nameInput.focus(), 50);
+  }
+
+  function hideModal() {
+    const val = nameInput.value.trim();
+    if (!val) return;
+    setUsername(val);
+    modal.classList.add('hidden');
+  }
+
+  nameBtn.addEventListener('click', hideModal);
+  nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') hideModal(); });
+  document.getElementById('btn-change-name').addEventListener('click', showModal);
+
+  if (!username) {
+    showModal();
+  } else {
+    modal.classList.add('hidden');
+    document.getElementById('username-display').textContent = username;
+  }
+
+  // ── Connection status ─────────────────────────────────────────────────────────
+  const dot      = document.getElementById('status-dot');
+  const statusTx = document.getElementById('status-text');
+  let connected  = false;
+
+  // Gun doesn't expose a clean connected event, so we detect it via first data
+  function markConnected() {
+    if (connected) return;
+    connected = true;
+    dot.classList.add('connected');
+    statusTx.textContent = 'live';
+  }
+
+  // Timeout fallback — assume connected after 3s if no error
+  setTimeout(markConnected, 3000);
+
+  // ── Messages ──────────────────────────────────────────────────────────────────
+  const msgMap    = new Map(); // key → {user, text, time}
+  const msgsList  = document.getElementById('messages-list');
+  const wrap      = document.getElementById('messages-wrap');
+  let   atBottom  = true;
+
+  wrap.addEventListener('scroll', () => {
+    atBottom = wrap.scrollHeight - wrap.scrollTop - wrap.clientHeight < 60;
+  });
+
+  function scrollToBottom(force) {
+    if (force || atBottom) {
+      wrap.scrollTop = wrap.scrollHeight;
+    }
+  }
+
+  function initials(name) {
+    return (name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  }
+
+  function formatTime(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    const h = d.getHours().toString().padStart(2,'0');
+    const m = d.getMinutes().toString().padStart(2,'0');
+    return h + ':' + m;
+  }
+
+  function formatDay(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    const today = new Date();
+    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+    if (d.toDateString() === today.toDateString()) return 'Today';
+    if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+    return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function renderMessages() {
+    const msgs = [...msgMap.values()]
+      .filter(m => m && m.text && m.time && typeof m.time === 'number')
+      .sort((a, b) => a.time - b.time)
+      .slice(-MAX_MSGS);
+
+    msgsList.innerHTML = '';
+    let lastDay = '';
+
+    msgs.forEach(m => {
+      const day = formatDay(m.time);
+      if (day !== lastDay) {
+        lastDay = day;
+        const label = document.createElement('div');
+        label.className = 'day-label';
+        label.textContent = day;
+        msgsList.appendChild(label);
+      }
+
+      const isMe = m.uid === userId;
+      const el = document.createElement('div');
+      el.className = 'msg';
+      el.innerHTML = `
+        <div class="msg-avatar">${initials(m.user)}</div>
+        <div class="msg-body">
+          <div class="msg-header">
+            <span class="msg-name${isMe ? ' is-me' : ''}">${esc(m.user || 'Anonymous')}</span>
+            <span class="msg-time">${formatTime(m.time)}</span>
+          </div>
+          <div class="msg-text">${esc(m.text)}</div>
+        </div>`;
+      msgsList.appendChild(el);
+    });
+
+    scrollToBottom();
+    markConnected();
+  }
+
+  msgsRef.map().on((data, key) => {
+    if (!data || !data.text || !data.time) return;
+    msgMap.set(key, data);
+    renderMessages();
+  });
+
+  function sendMessage() {
+    const input = document.getElementById('msg-input');
+    const text = input.value.trim();
+    if (!text || !username) return;
+
+    msgsRef.set({
+      user: username,
+      uid:  userId,
+      text: text,
+      time: Date.now()
+    });
+
+    input.value = '';
+    clearTyping();
+    scrollToBottom(true);
+  }
+
+  document.getElementById('send-btn').addEventListener('click', sendMessage);
+  document.getElementById('msg-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // ── Typing indicators ─────────────────────────────────────────────────────────
+  let typingTimer = null;
+  const othersTyping = new Map(); // uid → {user, text, time}
+
+  function broadcastTyping(text) {
+    typingRef.get(userId).put({
+      user: username,
+      uid:  userId,
+      text: text || '',
+      time: Date.now()
+    });
+  }
+
+  function clearTyping() {
+    typingRef.get(userId).put({ user: username, uid: userId, text: '', time: 0 });
+    clearTimeout(typingTimer);
+  }
+
+  document.getElementById('msg-input').addEventListener('input', e => {
+    const text = e.target.value;
+    if (text) {
+      broadcastTyping(text);
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(clearTyping, TYPING_EXPIRE_MS);
+    } else {
+      clearTyping();
+    }
+  });
+
+  // Listen for others typing
+  typingRef.map().on((data, key) => {
+    if (!data || !data.uid || data.uid === userId) return;
+    if (data.text && data.time && (Date.now() - data.time) < TYPING_EXPIRE_MS) {
+      othersTyping.set(data.uid, data);
+    } else {
+      othersTyping.delete(data.uid);
+    }
+    renderTyping();
+    markConnected();
+  });
+
+  // Periodically expire old typing states
+  setInterval(() => {
+    const now = Date.now();
+    let changed = false;
+    for (const [uid, d] of othersTyping) {
+      if (!d.time || (now - d.time) > TYPING_EXPIRE_MS) {
+        othersTyping.delete(uid);
+        changed = true;
+      }
+    }
+    if (changed) renderTyping();
+  }, 1000);
+
+  function renderTyping() {
+    const liveArea   = document.getElementById('live-typing-area');
+    const typingBar  = document.getElementById('typing-bar');
+    const active = [...othersTyping.values()].filter(d => d.text && d.text.trim());
+
+    // Live text previews
+    liveArea.innerHTML = '';
+    active.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'live-preview';
+      el.innerHTML = `
+        <div class="msg-avatar" style="background:#ccc;color:#555">${initials(d.user)}</div>
+        <div class="msg-body">
+          <div class="msg-header">
+            <span class="msg-name">${esc(d.user || 'Someone')}</span>
+          </div>
+          <div class="msg-text">${esc(d.text)}</div>
+        </div>`;
+      liveArea.appendChild(el);
+    });
+
+    // Typing bar (names + dots)
+    if (active.length === 0) {
+      typingBar.innerHTML = '';
+    } else {
+      const names = active.map(d => esc(d.user || 'Someone'));
+      let label;
+      if (names.length === 1) label = names[0] + ' is typing';
+      else if (names.length === 2) label = names[0] + ' and ' + names[1] + ' are typing';
+      else label = names[0] + ' and ' + (names.length - 1) + ' others are typing';
+
+      typingBar.innerHTML = `${label}<span class="typing-dots"><span></span><span></span><span></span></span>`;
+    }
+  }
+
+  // ── Escape HTML ────────────────────────────────────────────────────────────────
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // Clean up own typing state on page unload
+  window.addEventListener('beforeunload', clearTyping);
+
+})();
+</script>
+</body>
+</html>
