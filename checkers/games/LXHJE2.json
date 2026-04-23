@@ -5,7 +5,10 @@
       "name": "quincy",
       "joinedAt": "2026-04-23T04:20:51.665Z"
     },
-    null,
+    {
+      "name": "Big Dick",
+      "joinedAt": "2026-04-23T04:21:12.395Z"
+    },
     null,
     null,
     null,
@@ -77,5 +80,5 @@
   "turnCount": 0,
   "finishOrder": [],
   "winner": null,
-  "updatedAt": "2026-04-23T04:20:51.665Z"
+  "updatedAt": "2026-04-23T04:21:12.395Z"
 }
