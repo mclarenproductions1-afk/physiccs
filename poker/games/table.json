@@ -12,7 +12,17 @@
       "lastAction": "",
       "joinedAt": "2026-04-22T04:41:13.119Z"
     },
-    null,
+    {
+      "name": "f",
+      "chips": 1000,
+      "bet": 0,
+      "hand": [],
+      "folded": false,
+      "allIn": false,
+      "inHand": false,
+      "lastAction": "",
+      "joinedAt": "2026-04-23T00:28:37.266Z"
+    },
     null,
     null,
     null,
@@ -33,5 +43,5 @@
   "lastAggressor": -1,
   "roundStartPlayer": -1,
   "actions": [],
-  "updatedAt": "2026-04-22T04:41:13.119Z"
+  "updatedAt": "2026-04-23T00:28:37.266Z"
 }
